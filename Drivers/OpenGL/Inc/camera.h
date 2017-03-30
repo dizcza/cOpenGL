@@ -2,7 +2,7 @@
  * camera.h
  *
  *  Created on: Nov 12, 2016
- *      Author: dizczaw7
+ *      Author: dizcza
  */
 
 #ifndef CAMERA_H_

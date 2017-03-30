@@ -2,7 +2,7 @@
  * cube.c
  *
  *  Created on: Nov 11, 2016
- *      Author: dizczaw7
+ *      Author: dizcza
  */
 
 
@@ -66,7 +66,8 @@ void Cube_Translate(Cube* cube, float x, float y, float z) {
 	mat4x4_translate_in_place(cube->model, x, y, z);
 }
 
-void Cube_GetTrianlge(Cube* cube, Triangle trian, uint8_t tr_id) {
+// in 3D space
+void Cube_GetTrianlge(Cube* cube, trian4 trian, uint8_t tr_id) {
 	uint8_t index;
 	for (index = 3 * tr_id; index < 3 * (tr_id + 1); ++index) {
 		uint8_t vid = cube->indices[index];

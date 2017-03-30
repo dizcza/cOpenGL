@@ -181,7 +181,7 @@ uint8_t BSP_LCD_Init(void)
     /* Configure accumulated vertical back porch */
     LtdcHandler.Init.AccumulatedVBP = ILI9341_VBP;
     /* Configure accumulated active width */
-    LtdcHandler.Init.AccumulatedActiveW = 269;
+    LtdcHandler.Init.AccumulatedActiveW = 269;	// todo: change to ILI9341_LCD_PIXEL_WIDTH
     /* Configure accumulated active height */
     LtdcHandler.Init.AccumulatedActiveH = 323;
     /* Configure total width */

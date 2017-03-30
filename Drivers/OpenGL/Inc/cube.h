@@ -2,7 +2,7 @@
  * cube.h
  *
  *  Created on: Nov 11, 2016
- *      Author: dizczaw7
+ *      Author: dizcza
  */
 
 #ifndef CUBE_H_
@@ -28,6 +28,6 @@ void Cube_Scale(Cube* cube, float scale);
 void Cube_Translate(Cube* cube, float x, float y, float z);
 void Cube_Rotate(Cube* cube, quat q);
 
-void Cube_GetTrianlge(Cube* cube, Triangle trian, uint8_t tr_id);
+void Cube_GetTrianlge(Cube* cube, trian4 trian, uint8_t tr_id);
 
 #endif /* CUBE_H_ */

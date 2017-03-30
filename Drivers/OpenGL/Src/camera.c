@@ -2,7 +2,7 @@
  * camera.c
  *
  *  Created on: Nov 12, 2016
- *      Author: dizczaw7
+ *      Author: dizcza
  */
 
 #include "camera.h"
