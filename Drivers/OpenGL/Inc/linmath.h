@@ -3,6 +3,10 @@
 
 #include <math.h>
 #include "stdint.h"
+#include "float.h"
+
+#define min(x,y) (x < y ? x : y)
+#define max(x,y) (x > y ? x : y)
 
 #define LINMATH_H_DEFINE_VEC(n) \
 typedef float vec##n[n]; \
@@ -85,11 +89,42 @@ static inline void vec##n##_interpolate(vec##n * buffer, uint32_t cnt, vec##n co
 	for (i = 1; i < cnt; ++i) { \
 		vec##n##_add(buffer[i], buffer[i - 1], inc); \
 	} \
+} \
+static inline void vec##n##_pos_inf(vec##n v) { \
+	uint8_t i; \
+	for (i = 0; i < n; ++i) { \
+		v[i] = FLT_MAX; \
+	} \
+} \
+static inline void vec##n##_neg_inf(vec##n v) { \
+	uint8_t i; \
+	for (i = 0; i < n; ++i) { \
+		v[i] = -FLT_MAX; \
+	} \
 }
 
 LINMATH_H_DEFINE_VEC(2)
 LINMATH_H_DEFINE_VEC(3)
 LINMATH_H_DEFINE_VEC(4)
+
+# define LINMATH_H_DEFINE_VECI(n,b) \
+typedef int##b##_t vec##n##i[n]; \
+static void inline vec##n##i_floor(vec##n##i vint, vec##n const vf) { \
+	uint8_t i; \
+	for (i = 0; i < n; ++i) { \
+		vint[i] = (int##b##_t) floorf(vf[i]); \
+	} \
+} \
+static void inline vec##n##i_ceil(vec##n##i vint, vec##n const vf) { \
+	uint8_t i; \
+	for (i = 0; i < n; ++i) { \
+		vint[i] = (int##b##_t) ceilf(vf[i]); \
+	} \
+}
+
+LINMATH_H_DEFINE_VECI(2,16);
+LINMATH_H_DEFINE_VECI(3,16);
+LINMATH_H_DEFINE_VECI(4,16);
 
 static inline float vec2_mul_cross(vec2 const a, vec2 const b) {
 	return a[0] * b[1] - a[1] * b[0];

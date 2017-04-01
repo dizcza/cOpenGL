@@ -16,6 +16,28 @@ static inline void trian##n##_init(trian##n trian, vec##n const v0, vec##n const
 	vec##n##_copy(trian[0], v0); \
 	vec##n##_copy(trian[1], v1); \
 	vec##n##_copy(trian[2], v2); \
+} \
+static inline void trian##n##_bbox(vec##n bmin, vec##n bmax, trian##n const trian) { \
+	vec##n##_pos_inf(bmin); \
+	vec##n##_neg_inf(bmax); \
+	uint8_t vi, dim; \
+	for (vi = 0; vi < 3; ++vi) { \
+		for (dim = 0; dim < n; ++dim) { \
+			if (trian[vi][dim] < bmin[dim]) { \
+				bmin[dim] = trian[vi][dim]; \
+			} \
+			if (trian[vi][dim] > bmax[dim]) { \
+				bmax[dim] = trian[vi][dim]; \
+			} \
+		} \
+	} \
+} \
+static inline void trian##n##_bboxi(vec##n##i bmin, vec##n##i bmax, trian##n const trian) { \
+	vec##n bmin_float; \
+	vec##n bmax_float; \
+	trian##n##_bbox(bmin_float, bmax_float, trian); \
+	vec##n##i_floor(bmin, bmin_float); \
+	vec##n##i_ceil(bmax, bmax_float); \
 }
 
 TRIANGLE_DEFINE_TRIAN(2);

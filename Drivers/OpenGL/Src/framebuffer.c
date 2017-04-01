@@ -8,6 +8,7 @@
 #include "framebuffer.h"
 #include "linmath.h"
 #include "stm32f429i_discovery_lcd.h"
+#include <stdlib.h> // todo: use hardware random generator
 
 #define ASPECT (((float) TFTWIDTH) / (TFTHEIGHT))
 
@@ -39,29 +40,32 @@ void FrameBuffer_Flush(FrameBuffer* frame) {
 }
 
 
-void FrameBuffer_FillTrian(FrameBuffer* frame, trian3 const trian_z, mat4x4 const mvp, uint32_t color) {
-	uint16_t i, j;
-	trian2 trian2d;
+void FrameBuffer_FillTrian(FrameBuffer* frame, trian3 const trian_xyz, mat4x4 const mvp, uint32_t color) {
+	uint16_t y, x;
+	trian2 trian_xy;
 	vec3 vdepths;
-	trian3_getVerticesDepth(vdepths, trian_z);
-	trian2_fromTrian3(trian2d, trian_z);
-	for (i = 0; i < TFTHEIGHT; ++i) {
-		for (j = 0; j < TFTWIDTH; ++j) {
+	trian3_getVerticesDepth(vdepths, trian_xyz);
+	trian2_fromTrian3(trian_xy, trian_xyz);
+	int16_t bmin[2];
+	int16_t bmax[2];
+	trian2_bboxi(bmin, bmax, trian_xy);
+	for (y = max(bmin[1], 0); y < min(bmax[1], TFTHEIGHT); ++y) {
+		for (x = max(bmin[0], 0); x < min(bmax[0], TFTWIDTH); ++x) {
 			//float p_depth = buffer[pid][2]; - calculate based on three vertices; then check with frame buffer depth
-			vec2 p = {j, i};
-			if (trian2_isPointInside(trian2d, p)) {
-				frame->color[i][j] = color;
+			vec2 p = {x, y};
+			if (trian2_isPointInside(trian_xy, p)) {
+				frame->color[y][x] = color;
 			}
 		}
 	}
 }
 
-void FrameBuffer_CountourTrian(FrameBuffer* frame, trian4 const trian_z, mat4x4 const mvp, uint32_t color) {
+void FrameBuffer_CountourTrian(FrameBuffer* frame, trian3 const trian_xyz, mat4x4 const mvp, uint32_t color) {
 	vec3 buffer[PX_CNT];
 	uint8_t i;
 	for (i = 0; i < 3; ++i) {
 		uint8_t next = (i + 1) % 3;
-		vec3_interpolate(buffer, PX_CNT, trian_z[i], trian_z[next]);
+		vec3_interpolate(buffer, PX_CNT, trian_xyz[i], trian_xyz[next]);
 		int32_t pid = 0;
 		for (pid = 0; pid < PX_CNT; ++pid) {
 			int16_t x = (int16_t) buffer[pid][0];
@@ -75,16 +79,17 @@ void FrameBuffer_CountourTrian(FrameBuffer* frame, trian4 const trian_z, mat4x4 
 	}
 }
 
-void FrameBuffer_ProjectTrian4(FrameBuffer* frame, trian4 const trian, mat4x4 const mvp, uint32_t color) {
+void FrameBuffer_ProjectTrian4(FrameBuffer* frame, trian4 const trian, mat4x4 const mvp) {
 	uint8_t i;
-	trian3 trian_z;
+	trian3 trian_xyz;
 	for (i = 0; i < 3; ++i) {
 		vec4 ndc_point;
 		mat4x4_mul_vec4(ndc_point, mvp, trian[i]);
 		vec4_scale_self(ndc_point, 1.0 / ndc_point[3]);
-		ndc_to_screen(trian_z[i], ndc_point);
+		ndc_to_screen(trian_xyz[i], ndc_point);
 	}
-	FrameBuffer_FillTrian(frame, trian_z, mvp, color);
+	uint32_t color = abs(rand());
+	FrameBuffer_FillTrian(frame, trian_xyz, mvp, color);
 }
 
 
@@ -99,7 +104,7 @@ void FrameBuffer_DrawCube(FrameBuffer* frame, Camera* const camera, Cube* const 
 	uint8_t tr_id;
 	for (tr_id = 0; tr_id < CUBE_TRIANGLE_COUNT; ++tr_id) {
 		Cube_GetTrianlge(cube, trian, tr_id);
-		FrameBuffer_ProjectTrian4(frame, trian, mvp, LCD_COLOR_BLUE);
+		FrameBuffer_ProjectTrian4(frame, trian, mvp);
 	}
 }
 
