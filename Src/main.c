@@ -47,6 +47,7 @@
 #include "cube.h"
 #include "camera.h"
 #include "framebuffer.h"
+#include "depth_sdram.h"
 
 #include "debug_printf.h"
 
@@ -55,8 +56,11 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-/* Private variables ---------------------------------------------------------*/
 
+#define DEPTH_SDRAM_START_ADRRES (LCD_FRAME_BUFFER + 2 * BUFFER_OFFSET)
+
+/* Private variables ---------------------------------------------------------*/
+extern SDRAM_HandleTypeDef hsdram1;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -81,7 +85,6 @@ void BSP_InitStuff() {
 	BSP_LCD_LayerDefaultInit(1, LCD_FRAME_BUFFER);
 	BSP_LCD_LayerDefaultInit(0, LCD_FRAME_BUFFER + BUFFER_OFFSET);
 
-
 	/* Initialize LEDs */
 	BSP_LED_Init(LED3);
 	BSP_LED_Init(LED4);
@@ -103,7 +106,7 @@ int main(void) {
 	/* USER CODE BEGIN 1 */
 
 #ifdef DEBUG
-     initialise_monitor_handles();
+	initialise_monitor_handles();
 #endif
 
 	/* USER CODE END 1 */
@@ -124,6 +127,9 @@ int main(void) {
 	/* USER CODE BEGIN 2 */
 	BSP_InitStuff();
 
+	Depth_SDRAM_Init(&hsdram1, DEPTH_SDRAM_START_ADRRES, BSP_LCD_GetXSize(), BSP_LCD_GetYSize());
+	Depth_SDRAM_TestReadWrite();
+
 	Cube cube;
 	Cube_Init(&cube, 1.0);
 	mat4x4_rotate_Y(cube.model, cube.model, 10.0 * 3.14 / 180);
@@ -135,21 +141,18 @@ int main(void) {
 	Camera_Init(&camera);
 
 	FrameBuffer frame;
-	FrameBuffer_Init(&frame);
+	FrameBuffer_Init(&frame, BSP_LCD_GetXSize(), BSP_LCD_GetYSize());
 
 	FrameBuffer_DrawCube(&frame, &camera, &cube);
 	FrameBuffer_Flush(&frame);
 
 	BSP_LCD_SelectLayer(0);
-	//BSP_LCD_SetTransparency(0, 0x80);
 	FrameBuffer_Clear(&frame, LCD_COLOR_CYAN);
 	Cube_Translate(&cube, -0.6, -0.2, 0);
 	FrameBuffer_DrawCube(&frame, &camera, &cube);
 	FrameBuffer_Flush(&frame);
 
 	//BSP_LCD_SetLayerVisible_NoReload(0, ENABLE);
-
-
 
 	/* USER CODE END 2 */
 

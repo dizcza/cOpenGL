@@ -11,18 +11,17 @@
 #include "cube.h"
 #include "camera.h"
 
-#define TFTWIDTH 269 / 2
-#define TFTHEIGHT 323 / 2
-
-
 typedef struct FrameBuffer {
-	void (*DrawPixel)(uint16_t x, uint16_t y, uint32_t color);
 	uint16_t width, height;
-	float depth[TFTHEIGHT][TFTWIDTH];
 	float aspect;
+
+	void (*DrawPixel)(uint16_t x, uint16_t y, uint32_t color);
+	uint32_t (*ReadPixel)(uint16_t x, uint16_t y);
+	void (*WriteDepth)(uint16_t x, uint16_t y, float depth);
+	float (*ReadDepth)(uint16_t x, uint16_t y);
 } FrameBuffer;
 
-void FrameBuffer_Init(FrameBuffer* frame);
+void FrameBuffer_Init(FrameBuffer* frame, uint16_t width, uint16_t height);
 void FrameBuffer_Flush(FrameBuffer* frame);
 void FrameBuffer_Clear(FrameBuffer* frame, uint32_t color);
 void FrameBuffer_DrawCube(FrameBuffer* frame, const Camera* camera, const Cube* cube);

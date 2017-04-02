@@ -40,12 +40,41 @@
 
 /* USER CODE END 0 */
 
+SDRAM_HandleTypeDef hsdram1;
 SDRAM_HandleTypeDef hsdram2;
 
 /* FMC initialization function */
 void MX_FMC_Init(void)
 {
   FMC_SDRAM_TimingTypeDef SdramTiming;
+
+  /** Perform the SDRAM1 memory initialization sequence
+  */
+  hsdram1.Instance = FMC_SDRAM_DEVICE;
+  /* hsdram1.Init */
+  hsdram1.Init.SDBank = FMC_SDRAM_BANK1;
+  hsdram1.Init.ColumnBitsNumber = FMC_SDRAM_COLUMN_BITS_NUM_8;
+  hsdram1.Init.RowBitsNumber = FMC_SDRAM_ROW_BITS_NUM_12;
+  hsdram1.Init.MemoryDataWidth = FMC_SDRAM_MEM_BUS_WIDTH_8;
+  hsdram1.Init.InternalBankNumber = FMC_SDRAM_INTERN_BANKS_NUM_4;
+  hsdram1.Init.CASLatency = FMC_SDRAM_CAS_LATENCY_1;
+  hsdram1.Init.WriteProtection = FMC_SDRAM_WRITE_PROTECTION_DISABLE;
+  hsdram1.Init.SDClockPeriod = FMC_SDRAM_CLOCK_PERIOD_2;
+  hsdram1.Init.ReadBurst = FMC_SDRAM_RBURST_DISABLE;
+  hsdram1.Init.ReadPipeDelay = FMC_SDRAM_RPIPE_DELAY_1;
+  /* SdramTiming */
+  SdramTiming.LoadToActiveDelay = 16;
+  SdramTiming.ExitSelfRefreshDelay = 7;
+  SdramTiming.SelfRefreshTime = 16;
+  SdramTiming.RowCycleDelay = 7;
+  SdramTiming.WriteRecoveryTime = 4;
+  SdramTiming.RPDelay = 2;
+  SdramTiming.RCDDelay = 16;
+
+  if (HAL_SDRAM_Init(&hsdram1, &SdramTiming) != HAL_OK)
+  {
+    Error_Handler();
+  }
 
   /** Perform the SDRAM2 memory initialization sequence
   */
@@ -99,6 +128,8 @@ static void HAL_FMC_MspInit(void){
   PF4   ------> FMC_A4
   PF5   ------> FMC_A5
   PC0   ------> FMC_SDNWE
+  PC2   ------> FMC_SDNE0
+  PC3   ------> FMC_SDCKE0
   PF11   ------> FMC_SDNRAS
   PF12   ------> FMC_A6
   PF13   ------> FMC_A7
@@ -133,7 +164,7 @@ static void HAL_FMC_MspInit(void){
   HAL_GPIO_Init(GPIOF, &GPIO_InitStruct);
 
   /* GPIO_InitStruct */
-  GPIO_InitStruct.Pin = GPIO_PIN_0;
+  GPIO_InitStruct.Pin = GPIO_PIN_0|GPIO_PIN_2|GPIO_PIN_3;
   GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
@@ -214,6 +245,8 @@ static void HAL_FMC_MspDeInit(void){
   PF4   ------> FMC_A4
   PF5   ------> FMC_A5
   PC0   ------> FMC_SDNWE
+  PC2   ------> FMC_SDNE0
+  PC3   ------> FMC_SDCKE0
   PF11   ------> FMC_SDNRAS
   PF12   ------> FMC_A6
   PF13   ------> FMC_A7
@@ -241,7 +274,7 @@ static void HAL_FMC_MspDeInit(void){
                           |GPIO_PIN_4|GPIO_PIN_5|GPIO_PIN_11|GPIO_PIN_12 
                           |GPIO_PIN_13|GPIO_PIN_14|GPIO_PIN_15);
 
-  HAL_GPIO_DeInit(GPIOC, GPIO_PIN_0);
+  HAL_GPIO_DeInit(GPIOC, GPIO_PIN_0|GPIO_PIN_2|GPIO_PIN_3);
 
   HAL_GPIO_DeInit(GPIOG, GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_4|GPIO_PIN_5 
                           |GPIO_PIN_8|GPIO_PIN_15);
