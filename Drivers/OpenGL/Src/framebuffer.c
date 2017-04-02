@@ -7,6 +7,8 @@
 
 #include "framebuffer.h"
 #include "linmath.h"
+#include "colors.h"
+#include "debug_printf.h"
 #include "stm32f429i_discovery_lcd.h"
 #include <stdlib.h> // todo: use hardware random generator
 
@@ -40,35 +42,33 @@ void FrameBuffer_Flush(FrameBuffer* frame) {
 }
 
 
-void FrameBuffer_FillTrian(FrameBuffer* frame, trian3 const trian_xyz, mat4x4 const mvp, uint32_t* colors) {
+void FrameBuffer_FillTrian(FrameBuffer* frame, trian3 const trian_xyz, mat4x4 const mvp, vec3uint32 colors) {
+	mat3x3 m_rgb;
+	Colors_fRgbFromHexMat(m_rgb, colors);
+	vec3 fv_rgb;
+
 	uint16_t y, x;
 	trian2 trian_xy;
-	vec3 vdepths, colors_float;
-	uint8_t i;
-	for (i = 0; i < 3; ++i) {
-		colors_float[i] = (float) colors[i];
-	}
-	//vec3_from_vec3i(colors_float, colors);
+	vec3 vdepths;
 	trian3_getVerticesDepth(vdepths, trian_xyz);
 	trian2_fromTrian3(trian_xy, trian_xyz);
-	int16_t bmin[2];
-	int16_t bmax[2];
+	vec2int16 bmin;
+	vec2int16 bmax;
 	vec3 baryc;
-	trian2_bboxi(bmin, bmax, trian_xy);
-//	for (y = max(bmin[1], 0); y < min(bmax[1], TFTHEIGHT); ++y) {
-//		for (x = max(bmin[0], 0); x < min(bmax[0], TFTWIDTH); ++x) {
-	for (y = 0; y < TFTHEIGHT; ++y) {
-		for (x = 0; x < TFTWIDTH; ++x) {
+	trian2_bbox_int16(bmin, bmax, trian_xy);
+	for (y = max(bmin[1], 0); y < min(bmax[1], TFTHEIGHT); ++y) {
+		for (x = max(bmin[0], 0); x < min(bmax[0], TFTWIDTH); ++x) {
 			vec2 p = {x, y};
 			trian2_barycentric(baryc, trian_xy, p);
 			if (vec3_all_pos(baryc)) {
 				float p_depth = vec3_mul_inner(baryc, vdepths);
 				if (p_depth >= -1.0 && p_depth < frame->depth[y][x]) {
 					frame->depth[y][x] = p_depth;
-					float p_color = vec3_mul_inner(baryc, colors_float);
-					uint32_t p_colori = (uint32_t) p_color;
-					frame->color[y][x] = p_colori;
-					//frame->color[y][x] = LCD_COLOR_BLUE;
+					mat3x3_mul_vec3(fv_rgb, m_rgb, baryc);
+					uint32_t p_color = Colors_HexFromRgbf(fv_rgb);
+					frame->color[y][x] = p_color;
+					//db_printf("color 0x%08x \n", p_color);
+					//BSP_LCD_DrawPixel(x, y, frame->color[y][x]);
 				}
 			}
 		}
@@ -103,7 +103,7 @@ void FrameBuffer_ProjectTrian4(FrameBuffer* frame, trian4 const trian, mat4x4 co
 		vec4_scale_self(ndc_point, 1.0 / ndc_point[3]);
 		ndc_to_screen(trian_xyz[i], ndc_point);
 	}
-	uint32_t colors[3];
+	vec3uint32 colors;
 //	for (i = 0; i < 3; ++i) {
 //		colors[i] = abs(rand());
 //	}

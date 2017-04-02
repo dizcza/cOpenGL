@@ -32,12 +32,12 @@ static inline void trian##n##_bbox(vec##n bmin, vec##n bmax, trian##n const tria
 		} \
 	} \
 } \
-static inline void trian##n##_bboxi(vec##n##i bmin, vec##n##i bmax, trian##n const trian) { \
+static inline void trian##n##_bbox_int16(vec##n##int16 bmin, vec##n##int16 bmax, trian##n const trian) { \
 	vec##n bmin_float; \
 	vec##n bmax_float; \
 	trian##n##_bbox(bmin_float, bmax_float, trian); \
-	vec##n##i_floor(bmin, bmin_float); \
-	vec##n##i_ceil(bmax, bmax_float); \
+	vec##n##int16_floor(bmin, bmin_float); \
+	vec##n##int16_ceil(bmax, bmax_float); \
 }
 
 TRIANGLE_DEFINE_TRIAN(2);

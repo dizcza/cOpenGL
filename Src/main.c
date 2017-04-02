@@ -48,17 +48,8 @@
 #include "camera.h"
 #include "framebuffer.h"
 
-#define DEBUG1
- #ifdef DEBUG
-     #include <stdio.h>
-     #include <stdlib.h>
-     #define db_puts(s) puts(s)
-     #define db_printf(szFormat, ...) printf(szFormat,##__VA_ARGS__)
-	 extern void initialise_monitor_handles(void);
- #else
-     #define db_puts(s)
-     #define db_printf(szFormat, ...)
- #endif
+#include "debug_printf.h"
+
 /* USER CODE END Includes */
 
 /* Private variables ---------------------------------------------------------*/
@@ -124,9 +115,9 @@ void LCD_TestColorGradient(uint32_t w, uint32_t h) {
 	for (y = 0; y < h; ++y) {
 		for (x = 0; x < w; ++x) {
 			float c1_part = (w - x) * 1.f / w;
-			uint32_t red = interp(c1_r, c2_r, c1_part);
-			uint32_t green = interp(c1_g, c2_g, c1_part);
-			uint32_t blue = interp(c1_b, c2_b, c1_part);
+			uint8_t red = interp(c1_r, c2_r, c1_part);
+			uint8_t green = interp(c1_g, c2_g, c1_part);
+			uint8_t blue = interp(c1_b, c2_b, c1_part);
 			uint32_t color = 0xFF000000 + (red << 16) + (green << 8) + blue;
 			if (color < LCD_COLOR_GREEN || color > LCD_COLOR_RED) {
 				BSP_LED_On(LED4);
@@ -134,6 +125,7 @@ void LCD_TestColorGradient(uint32_t w, uint32_t h) {
 			BSP_LCD_DrawPixel(x, y, color);
 		}
 	}
+	HAL_Delay(500);
 }
 
 
@@ -165,6 +157,8 @@ int main(void) {
 	/* USER CODE BEGIN 2 */
 	BSP_InitStuff();
 
+	//LCD_TestColorGradient(BSP_LCD_GetXSize(), BSP_LCD_GetYSize());
+
 	Cube cube;
 	Cube_Init(&cube, 1.0);
 	mat4x4_rotate_Y(cube.model, cube.model, 10.0 * 3.14 / 180);
@@ -180,7 +174,6 @@ int main(void) {
 	FrameBuffer_DrawCube(&frame, &camera, &cube);
 	FrameBuffer_Flush(&frame);
 
-	LCD_TestColorGradient(BSP_LCD_GetXSize(), BSP_LCD_GetYSize());
 
 	/* USER CODE END 2 */
 

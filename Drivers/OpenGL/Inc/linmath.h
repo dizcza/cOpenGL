@@ -109,42 +109,55 @@ static inline uint8_t vec##n##_all_pos(vec##n v) { \
 		res &= v[i] >= 0; \
 	} \
 	return res; \
+} \
+static inline uint8_t vec##n##_all_neg(vec##n v) { \
+	uint8_t i; \
+	uint8_t res = 1; \
+	for (i = 0; i < n; ++i) { \
+		res &= v[i] <= 0; \
+	} \
+	return res; \
 }
 
 LINMATH_H_DEFINE_VEC(2)
 LINMATH_H_DEFINE_VEC(3)
 LINMATH_H_DEFINE_VEC(4)
 
-# define LINMATH_H_DEFINE_VECI(n,b) \
-typedef int##b##_t vec##n##i[n]; \
-static void inline vec##n##i_floor(vec##n##i vint, vec##n const vf) { \
+# define LINMATH_H_DEFINE_VECI(n,pref,b) \
+typedef pref##int##b##_t vec##n##pref##int##b[n]; \
+static void inline vec##n##pref##int##b##_floor(vec##n##pref##int##b vint, vec##n const vf) { \
 	uint8_t i; \
 	for (i = 0; i < n; ++i) { \
 		vint[i] = (int##b##_t) floorf(vf[i]); \
 	} \
 } \
-static void inline vec##n##i_ceil(vec##n##i vint, vec##n const vf) { \
+static void inline vec##n##pref##int##b##_ceil(vec##n##pref##int##b vint, vec##n const vf) { \
 	uint8_t i; \
 	for (i = 0; i < n; ++i) { \
 		vint[i] = (int##b##_t) ceilf(vf[i]); \
 	} \
 } \
-static void inline vec##n##i_from_vec##n(vec##n##i vint, vec##n const vf) { \
+static void inline vec##n##pref##int##b##_from_vec##n(vec##n##pref##int##b vint, vec##n const vf) { \
 	uint8_t i; \
 	for (i = 0; i < n; ++i) { \
 		vint[i] = (int##b##_t) vf[i]; \
 	} \
 } \
-static void inline vec##n##_from_vec##n##i(vec##n vf, vec##n##i const vint) { \
+static void inline vec##n##_from_vec##n##pref##int##b(vec##n vf, vec##n##pref##int##b const vint) { \
 	uint8_t i; \
 	for (i = 0; i < n; ++i) { \
 		vf[i] = (float) vint[i]; \
 	} \
 }
 
-LINMATH_H_DEFINE_VECI(2,16);
-LINMATH_H_DEFINE_VECI(3,16);
-LINMATH_H_DEFINE_VECI(4,16);
+LINMATH_H_DEFINE_VECI(2,,16);
+LINMATH_H_DEFINE_VECI(3,,16);
+LINMATH_H_DEFINE_VECI(4,,16);
+
+LINMATH_H_DEFINE_VECI(2,u,32);
+LINMATH_H_DEFINE_VECI(3,u,32);
+LINMATH_H_DEFINE_VECI(4,u,32);
+
 
 static inline float vec2_mul_cross(vec2 const a, vec2 const b) {
 	return a[0] * b[1] - a[1] * b[0];
@@ -201,7 +214,52 @@ static inline void vec4_from_vec3(vec4 r, vec3 const point) {
 	r[3] = 0.f;
 }
 
-typedef vec4 mat4x4[4];
+#define LINMATH_H_DEFINE_MAT(n) \
+typedef vec##n mat##n##x##n[n]; \
+static inline void mat##n##x##n##_mul_vec##n(vec##n r, mat##n##x##n const M, vec##n const v) { \
+	vec##n r_temp; \
+	uint8_t i, j; \
+	for (j = 0; j < n; ++j) { \
+		r_temp[j] = 0.f; \
+		for (i = 0; i < n; ++i) \
+			r_temp[j] += M[i][j] * v[i]; \
+	} \
+	vec##n##_copy(r, r_temp); \
+} \
+static inline void mat##n##x##n##_set_col(mat##n##x##n M, vec##n const v, uint8_t col_index) { \
+	uint8_t i; \
+	for (i = 0; i < n; ++i) { \
+		M[i][col_index] = v[i]; \
+	} \
+} \
+static inline void mat##n##x##n##_set_row(mat##n##x##n M, vec##n const v, uint8_t row_index) { \
+	uint8_t j; \
+	for (j = 0; j < n; ++j) { \
+		M[row_index][j] = v[j]; \
+	} \
+}
+
+LINMATH_H_DEFINE_MAT(3);
+LINMATH_H_DEFINE_MAT(4);
+
+//static void mat3x3_vstack(mat3x3 M, vec3 const v0, vec3 const v1, vec3 const v2) {
+//	uint8_t i;
+//	for (i = 0; i < 3; ++i) {
+//		M[i][0] = v0[i];
+//		M[i][1] = v1[i];
+//		M[i][2] = v2[i];
+//	}
+//}
+//static void mat4x4_vstack(mat4x4 M, vec4 const v0, vec4 const v1, vec4 const v2, vec4 const v3) {
+//	uint8_t i;
+//	for (i = 0; i < 4; ++i) {
+//		M[i][0] = v0[i];
+//		M[i][1] = v1[i];
+//		M[i][2] = v2[i];
+//		M[i][3] = v3[i];
+//	}
+//}
+
 static inline void mat4x4_identity(mat4x4 M) {
 	int i, j;
 	for (i = 0; i < 4; ++i)
@@ -271,16 +329,7 @@ static inline void mat4x4_mul(mat4x4 M, mat4x4 const a, mat4x4 const b) {
 		}
 	mat4x4_dup(M, M_temp);
 }
-static inline void mat4x4_mul_vec4(vec4 r, mat4x4 const M, vec4 const v) {
-	vec4 r_temp;
-	int i, j;
-	for (j = 0; j < 4; ++j) {
-		r_temp[j] = 0.f;
-		for (i = 0; i < 4; ++i)
-			r_temp[j] += M[i][j] * v[i];
-	}
-	vec4_copy(r, r_temp);
-}
+
 static inline void mat4x4_translate(mat4x4 T, float x, float y, float z) {
 	mat4x4_identity(T);
 	T[3][0] = x;
@@ -673,28 +722,6 @@ static inline void quat_from_mat4x4(quat q, mat4x4 const M) {
 	q[1] = (M[p[0]][p[1]] - M[p[1]][p[0]]) / (2.f * r);
 	q[2] = (M[p[2]][p[0]] - M[p[0]][p[2]]) / (2.f * r);
 	q[3] = (M[p[2]][p[1]] - M[p[1]][p[2]]) / (2.f * r);
-}
-
-static inline void int16t_bbox2D(int16_t (*trian)[2], int16_t (*bbox)[2]) {
-	// bmin
-	bbox[0][0] = INT16_MAX;
-	bbox[0][1] = INT16_MAX;
-
-	//bmax
-	bbox[1][0] = INT16_MIN;
-	bbox[1][1] = INT16_MIN;
-
-	uint8_t i;
-	for (i = 0; i < 3; ++i) {
-		if (trian[i][0] < bbox[0][0])
-			bbox[0][0] = trian[i][0];
-		if (trian[i][1] < bbox[0][1])
-			bbox[0][1] = trian[i][1];
-		if (trian[i][0] > bbox[1][0])
-			bbox[1][0] = trian[i][0];
-		if (trian[i][1] > bbox[1][0])
-			bbox[1][0] = trian[i][1];
-	}
 }
 
 #endif  /* LINMATH_H */
