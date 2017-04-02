@@ -18,13 +18,8 @@ static uint32_t m_active_layer_id;
 
 void FrameBuffer_Init(FrameBuffer* frame) {
 	frame->aspect = (float) TFTWIDTH / TFTHEIGHT;
-	int16_t x, y;
-	for (x = 0; x < TFTWIDTH; ++x) {
-		for (y = 0; y < TFTHEIGHT; ++y) {
-			frame->depth[y][x] = 1.0;
-			frame->color[y][x] = LCD_COLOR_BLACK;
-		}
-	}
+	frame->DrawPixel = BSP_LCD_DrawPixel;
+	FrameBuffer_Clear(frame, LCD_COLOR_BLACK);
 }
 
 void FrameBuffer_Clear(FrameBuffer* frame, uint32_t color) {
@@ -32,7 +27,7 @@ void FrameBuffer_Clear(FrameBuffer* frame, uint32_t color) {
 	for (x = 0; x < TFTWIDTH; ++x) {
 		for (y = 0; y < TFTHEIGHT; ++y) {
 			frame->depth[y][x] = 1.0;
-			frame->color[y][x] = color;
+			frame->DrawPixel(x, y, color);
 		}
 	}
 }
@@ -48,7 +43,7 @@ void FrameBuffer_Flush(FrameBuffer* frame) {
 	int16_t x, y;
 	for (x = 0; x < TFTWIDTH; ++x) {
 		for (y = 0; y < TFTHEIGHT; ++y) {
-			BSP_LCD_DrawPixel(x, y, frame->color[y][x]);
+			//BSP_LCD_DrawPixel(x, y, frame->color[y][x]);
 			//BSP_LCD_DrawPixel(x, y, LCD_COLOR_MAGENTA);
 		}
 	}
@@ -79,9 +74,7 @@ void FrameBuffer_FillTrian(FrameBuffer* frame, trian3 const trian_xyz, mat4x4 co
 					frame->depth[y][x] = p_depth;
 					mat3x3_mul_vec3(fv_rgb, m_rgb, baryc);
 					uint32_t p_color = Colors_HexFromRgbf(fv_rgb);
-					frame->color[y][x] = p_color;
-					//db_printf("color 0x%08x \n", p_color);
-					//BSP_LCD_DrawPixel(x, y, frame->color[y][x]);
+					frame->DrawPixel(x, y, p_color);
 				}
 			}
 		}

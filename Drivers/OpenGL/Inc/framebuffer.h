@@ -16,8 +16,9 @@
 
 
 typedef struct FrameBuffer {
+	void (*DrawPixel)(uint16_t x, uint16_t y, uint32_t color);
+	uint16_t width, height;
 	float depth[TFTHEIGHT][TFTWIDTH];
-	uint32_t color[TFTHEIGHT][TFTWIDTH];
 	float aspect;
 } FrameBuffer;
 
