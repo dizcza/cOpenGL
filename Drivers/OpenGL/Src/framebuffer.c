@@ -40,21 +40,36 @@ void FrameBuffer_Flush(FrameBuffer* frame) {
 }
 
 
-void FrameBuffer_FillTrian(FrameBuffer* frame, trian3 const trian_xyz, mat4x4 const mvp, uint32_t color) {
+void FrameBuffer_FillTrian(FrameBuffer* frame, trian3 const trian_xyz, mat4x4 const mvp, uint32_t* colors) {
 	uint16_t y, x;
 	trian2 trian_xy;
-	vec3 vdepths;
+	vec3 vdepths, colors_float;
+	uint8_t i;
+	for (i = 0; i < 3; ++i) {
+		colors_float[i] = (float) colors[i];
+	}
+	//vec3_from_vec3i(colors_float, colors);
 	trian3_getVerticesDepth(vdepths, trian_xyz);
 	trian2_fromTrian3(trian_xy, trian_xyz);
 	int16_t bmin[2];
 	int16_t bmax[2];
+	vec3 baryc;
 	trian2_bboxi(bmin, bmax, trian_xy);
-	for (y = max(bmin[1], 0); y < min(bmax[1], TFTHEIGHT); ++y) {
-		for (x = max(bmin[0], 0); x < min(bmax[0], TFTWIDTH); ++x) {
-			//float p_depth = buffer[pid][2]; - calculate based on three vertices; then check with frame buffer depth
+//	for (y = max(bmin[1], 0); y < min(bmax[1], TFTHEIGHT); ++y) {
+//		for (x = max(bmin[0], 0); x < min(bmax[0], TFTWIDTH); ++x) {
+	for (y = 0; y < TFTHEIGHT; ++y) {
+		for (x = 0; x < TFTWIDTH; ++x) {
 			vec2 p = {x, y};
-			if (trian2_isPointInside(trian_xy, p)) {
-				frame->color[y][x] = color;
+			trian2_barycentric(baryc, trian_xy, p);
+			if (vec3_all_pos(baryc)) {
+				float p_depth = vec3_mul_inner(baryc, vdepths);
+				if (p_depth >= -1.0 && p_depth < frame->depth[y][x]) {
+					frame->depth[y][x] = p_depth;
+					float p_color = vec3_mul_inner(baryc, colors_float);
+					uint32_t p_colori = (uint32_t) p_color;
+					frame->color[y][x] = p_colori;
+					//frame->color[y][x] = LCD_COLOR_BLUE;
+				}
 			}
 		}
 	}
@@ -71,7 +86,7 @@ void FrameBuffer_CountourTrian(FrameBuffer* frame, trian3 const trian_xyz, mat4x
 			int16_t x = (int16_t) buffer[pid][0];
 			int16_t y = (int16_t) buffer[pid][1];
 			float p_depth = buffer[pid][2];
-			if (p_depth >= -1.0 && p_depth < frame->depth[x][y]) {
+			if (p_depth >= -1.0 && p_depth < frame->depth[y][x]) {
 				frame->color[y][x] = color;
 				frame->depth[y][x] = p_depth;
 			}
@@ -88,8 +103,14 @@ void FrameBuffer_ProjectTrian4(FrameBuffer* frame, trian4 const trian, mat4x4 co
 		vec4_scale_self(ndc_point, 1.0 / ndc_point[3]);
 		ndc_to_screen(trian_xyz[i], ndc_point);
 	}
-	uint32_t color = abs(rand());
-	FrameBuffer_FillTrian(frame, trian_xyz, mvp, color);
+	uint32_t colors[3];
+//	for (i = 0; i < 3; ++i) {
+//		colors[i] = abs(rand());
+//	}
+	colors[0] = LCD_COLOR_RED;
+	colors[1] = LCD_COLOR_GREEN;
+	colors[2] = LCD_COLOR_BLUE;
+	FrameBuffer_FillTrian(frame, trian_xyz, mvp, colors);
 }
 
 

@@ -59,16 +59,15 @@ static inline void trian3_getVerticesDepth(vec3 depth, trian3 const trian) {
 	}
 }
 
-static inline uint8_t trian2_edgeFunc(vec2 const v_from, vec2 const v_to, vec2 const p) {
-	return (p[0] - v_from[0]) * (v_to[1] - v_from[1]) - (p[1] - v_from[1]) * (v_to[0] - v_from[0]) >= 0;
+static inline float trian2_edgeFunc(vec2 const v_from, vec2 const v_to, vec2 const p) {
+	return (p[0] - v_from[0]) * (v_to[1] - v_from[1]) - (p[1] - v_from[1]) * (v_to[0] - v_from[0]);
 }
 
-static inline uint8_t trian2_isPointInside(trian2 const trian, vec2 const p) {
-	uint8_t inside = 1;
-	inside &= trian2_edgeFunc(trian[0], trian[1], p);
-	inside &= trian2_edgeFunc(trian[1], trian[2], p);
-	inside &= trian2_edgeFunc(trian[2], trian[0], p);
-	return inside;
+static inline void trian2_barycentric(vec3 coef, trian2 const trian, vec2 const p) {
+	float area = trian2_edgeFunc(trian[0], trian[1], trian[2]);
+	coef[0] = trian2_edgeFunc(trian[1], trian[2], p) / area;
+	coef[1] = trian2_edgeFunc(trian[2], trian[0], p) / area;
+	coef[2] = trian2_edgeFunc(trian[0], trian[1], p) / area;
 }
 
 #endif /* TRIANGLE_H_ */

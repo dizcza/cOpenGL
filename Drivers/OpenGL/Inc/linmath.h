@@ -101,6 +101,14 @@ static inline void vec##n##_neg_inf(vec##n v) { \
 	for (i = 0; i < n; ++i) { \
 		v[i] = -FLT_MAX; \
 	} \
+} \
+static inline uint8_t vec##n##_all_pos(vec##n v) { \
+	uint8_t i; \
+	uint8_t res = 1; \
+	for (i = 0; i < n; ++i) { \
+		res &= v[i] >= 0; \
+	} \
+	return res; \
 }
 
 LINMATH_H_DEFINE_VEC(2)
@@ -119,6 +127,18 @@ static void inline vec##n##i_ceil(vec##n##i vint, vec##n const vf) { \
 	uint8_t i; \
 	for (i = 0; i < n; ++i) { \
 		vint[i] = (int##b##_t) ceilf(vf[i]); \
+	} \
+} \
+static void inline vec##n##i_from_vec##n(vec##n##i vint, vec##n const vf) { \
+	uint8_t i; \
+	for (i = 0; i < n; ++i) { \
+		vint[i] = (int##b##_t) vf[i]; \
+	} \
+} \
+static void inline vec##n##_from_vec##n##i(vec##n vf, vec##n##i const vint) { \
+	uint8_t i; \
+	for (i = 0; i < n; ++i) { \
+		vf[i] = (float) vint[i]; \
 	} \
 }
 
