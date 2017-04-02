@@ -10,12 +10,6 @@
 
 #include "cube.h"
 #include "camera.h"
-#include "ili9341.h"
-
-#define PX_CNT 100
-
-//#define TFTWIDTH ILI9341_LCD_PIXEL_WIDTH / 2
-//#define TFTHEIGHT ILI9341_LCD_PIXEL_HEIGHT / 2
 
 #define TFTWIDTH 269 / 2
 #define TFTHEIGHT 323 / 2
@@ -29,7 +23,7 @@ typedef struct FrameBuffer {
 
 void FrameBuffer_Init(FrameBuffer* frame);
 void FrameBuffer_Flush(FrameBuffer* frame);
-
-void FrameBuffer_DrawCube(FrameBuffer* frame, Camera* const camera, Cube* const cube);
+void FrameBuffer_Clear(FrameBuffer* frame, uint32_t color);
+void FrameBuffer_DrawCube(FrameBuffer* frame, const Camera* camera, const Cube* cube);
 
 #endif /* FRAMEBUFFER_H_ */

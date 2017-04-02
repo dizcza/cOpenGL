@@ -26,8 +26,8 @@ void Cube_Init(Cube* cube, float size);
 
 void Cube_Scale(Cube* cube, float scale);
 void Cube_Translate(Cube* cube, float x, float y, float z);
-void Cube_Rotate(Cube* cube, quat q);
+void Cube_Rotate(Cube* cube, quat const q);
 
-void Cube_GetTrianlge(Cube* cube, trian4 trian, uint8_t tr_id);
+void Cube_GetTrianlge(const Cube* cube, trian4 trian, uint8_t tr_id);
 
 #endif /* CUBE_H_ */

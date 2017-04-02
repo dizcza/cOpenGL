@@ -79,6 +79,8 @@ void BSP_InitStuff() {
 
 	/* Initialize the LCD Layers */
 	BSP_LCD_LayerDefaultInit(1, LCD_FRAME_BUFFER);
+	BSP_LCD_LayerDefaultInit(0, LCD_FRAME_BUFFER + BUFFER_OFFSET);
+
 
 	/* Initialize LEDs */
 	BSP_LED_Init(LED3);
@@ -86,48 +88,13 @@ void BSP_InitStuff() {
 
 	BSP_LCD_SelectLayer(1);
 	BSP_LCD_SetFont(&LCD_DEFAULT_FONT);
-	BSP_LCD_SetBackColor(LCD_COLOR_YELLOW);
+	BSP_LCD_SetBackColor(0xFF00FF00);
 	BSP_LCD_Clear(LCD_COLOR_WHITE);
 
 	/* Set the LCD Text Color */
-	BSP_LCD_SetTextColor(LCD_COLOR_DARKBLUE);
-	BSP_LCD_FillCircle(20, 20, 10);
+	BSP_LCD_SetTextColor(LCD_COLOR_MAGENTA);
+	BSP_LCD_FillCircle(20, 300, 10);
 }
-
-uint8_t interp(uint8_t c1, uint8_t c2, float c1_part) {
-	float cf = (float) c1 * c1_part + (float) c2 * (1.f - c1_part);
-	return (uint8_t) cf;
-}
-
-void LCD_TestColorGradient(uint32_t w, uint32_t h) {
-	uint32_t x, y;
-	uint32_t c1 = LCD_COLOR_RED;
-	uint32_t c2 = LCD_COLOR_GREEN;
-
-	uint32_t c1_r = (c1 >> 16) & 0xFF;
-	uint32_t c1_g = (c1 >> 8) & 0xFF;
-	uint32_t c1_b = (c1) & 0xFF;
-
-	uint32_t c2_r = (c2 >> 16) & 0xFF;
-	uint32_t c2_g = (c2 >> 8) & 0xFF;
-	uint32_t c2_b = (c2) & 0xFF;
-
-	for (y = 0; y < h; ++y) {
-		for (x = 0; x < w; ++x) {
-			float c1_part = (w - x) * 1.f / w;
-			uint8_t red = interp(c1_r, c2_r, c1_part);
-			uint8_t green = interp(c1_g, c2_g, c1_part);
-			uint8_t blue = interp(c1_b, c2_b, c1_part);
-			uint32_t color = 0xFF000000 + (red << 16) + (green << 8) + blue;
-			if (color < LCD_COLOR_GREEN || color > LCD_COLOR_RED) {
-				BSP_LED_On(LED4);
-			}
-			BSP_LCD_DrawPixel(x, y, color);
-		}
-	}
-	HAL_Delay(500);
-}
-
 
 /* USER CODE END 0 */
 
@@ -157,13 +124,12 @@ int main(void) {
 	/* USER CODE BEGIN 2 */
 	BSP_InitStuff();
 
-	//LCD_TestColorGradient(BSP_LCD_GetXSize(), BSP_LCD_GetYSize());
-
 	Cube cube;
 	Cube_Init(&cube, 1.0);
 	mat4x4_rotate_Y(cube.model, cube.model, 10.0 * 3.14 / 180);
 	mat4x4_rotate_Z(cube.model, cube.model, 10.0 * 3.14 / 180);
 	mat4x4_rotate_X(cube.model, cube.model, 10.0 * 3.14 / 180);
+	Cube_Translate(&cube, 0.2, 0, 0);
 
 	Camera camera;
 	Camera_Init(&camera);
@@ -173,6 +139,16 @@ int main(void) {
 
 	FrameBuffer_DrawCube(&frame, &camera, &cube);
 	FrameBuffer_Flush(&frame);
+
+	BSP_LCD_SelectLayer(0);
+	//BSP_LCD_SetTransparency(0, 0x80);
+	FrameBuffer_Clear(&frame, LCD_COLOR_CYAN);
+	Cube_Translate(&cube, -0.6, -0.2, 0);
+	FrameBuffer_DrawCube(&frame, &camera, &cube);
+	FrameBuffer_Flush(&frame);
+
+	//BSP_LCD_SetLayerVisible_NoReload(0, ENABLE);
+
 
 
 	/* USER CODE END 2 */

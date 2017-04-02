@@ -18,6 +18,6 @@ void Camera_Init(Camera* camera) {
 }
 
 
-void Camera_GetViewProj(Camera* const camera, mat4x4 vp) {
+void Camera_GetViewProj(const Camera* camera, mat4x4 vp) {
 	mat4x4_mul(vp, camera->proj, camera->view);
 }

@@ -242,23 +242,6 @@ static inline void mat##n##x##n##_set_row(mat##n##x##n M, vec##n const v, uint8_
 LINMATH_H_DEFINE_MAT(3);
 LINMATH_H_DEFINE_MAT(4);
 
-//static void mat3x3_vstack(mat3x3 M, vec3 const v0, vec3 const v1, vec3 const v2) {
-//	uint8_t i;
-//	for (i = 0; i < 3; ++i) {
-//		M[i][0] = v0[i];
-//		M[i][1] = v1[i];
-//		M[i][2] = v2[i];
-//	}
-//}
-//static void mat4x4_vstack(mat4x4 M, vec4 const v0, vec4 const v1, vec4 const v2, vec4 const v3) {
-//	uint8_t i;
-//	for (i = 0; i < 4; ++i) {
-//		M[i][0] = v0[i];
-//		M[i][1] = v1[i];
-//		M[i][2] = v2[i];
-//		M[i][3] = v3[i];
-//	}
-//}
 
 static inline void mat4x4_identity(mat4x4 M) {
 	int i, j;

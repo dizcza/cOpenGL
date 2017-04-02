@@ -16,6 +16,6 @@ typedef struct Camera {
 } Camera;
 
 void Camera_Init(Camera* camera);
-void Camera_GetViewProj(Camera* camera, mat4x4 vp);
+void Camera_GetViewProj(const Camera* camera, mat4x4 vp);
 
 #endif /* CAMERA_H_ */
