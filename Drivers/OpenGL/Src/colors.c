@@ -39,6 +39,6 @@ void Colors_fRgbFromHexMat(mat3x3 m_rgb, vec3uint32 const v_hex) {
 	for (j = 0; j < 3; ++j) {
 		vec3 fv_rgb;
 		Colors_fRgbFromHex(fv_rgb, v_hex[j]);
-		mat3x3_set_row(m_rgb, fv_rgb, j);
+		mat3x3_set_col(m_rgb, fv_rgb, j);
 	}
 }

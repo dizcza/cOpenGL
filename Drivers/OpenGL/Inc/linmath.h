@@ -61,7 +61,7 @@ static inline void vec##n##_norm_self(vec##n r) \
 { \
 	vec##n##_norm(r, r); \
 } \
-static inline void vec##n##_copy(vec##n r, vec##n const src) \
+static inline void vec##n##_dup(vec##n r, vec##n const src) \
 { \
 	int i; \
 	for(i=0; i<n; ++i) \
@@ -84,7 +84,7 @@ static inline void vec##n##_interpolate(vec##n * buffer, uint32_t cnt, vec##n co
 	vec##n inc; \
 	vec##n##_sub(inc, to, from); \
 	vec##n##_scale_self(inc, 1.f / (cnt - 1)); \
-	vec##n##_copy(buffer[0], from); \
+	vec##n##_dup(buffer[0], from); \
 	uint32_t i; \
 	for (i = 1; i < cnt; ++i) { \
 		vec##n##_add(buffer[i], buffer[i - 1], inc); \
@@ -168,7 +168,7 @@ static inline void vec3_mul_cross(vec3 r, vec3 const a, vec3 const b) {
 	r_temp[0] = a[1] * b[2] - a[2] * b[1];
 	r_temp[1] = a[2] * b[0] - a[0] * b[2];
 	r_temp[2] = a[0] * b[1] - a[1] * b[0];
-	vec3_copy(r, r_temp);
+	vec3_dup(r, r_temp);
 }
 
 static inline void vec4_mul_cross(vec4 r, vec4 const a, vec4 const b) {
@@ -177,7 +177,7 @@ static inline void vec4_mul_cross(vec4 r, vec4 const a, vec4 const b) {
 	r_temp[1] = a[2] * b[0] - a[0] * b[2];
 	r_temp[2] = a[0] * b[1] - a[1] * b[0];
 	r_temp[3] = 1.f;
-	vec3_copy(r, r_temp);
+	vec3_dup(r, r_temp);
 }
 
 static inline void vec3_reflect(vec3 r, vec3 const v, vec3 const n) {
@@ -214,6 +214,9 @@ static inline void vec4_from_vec3(vec4 r, vec3 const point) {
 	r[3] = 0.f;
 }
 
+/**
+ * Matrices are stored in column order.
+ */
 #define LINMATH_H_DEFINE_MAT(n) \
 typedef vec##n mat##n##x##n[n]; \
 static inline void mat##n##x##n##_mul_vec##n(vec##n r, mat##n##x##n const M, vec##n const v) { \
@@ -224,18 +227,18 @@ static inline void mat##n##x##n##_mul_vec##n(vec##n r, mat##n##x##n const M, vec
 		for (i = 0; i < n; ++i) \
 			r_temp[j] += M[i][j] * v[i]; \
 	} \
-	vec##n##_copy(r, r_temp); \
+	vec##n##_dup(r, r_temp); \
 } \
 static inline void mat##n##x##n##_set_col(mat##n##x##n M, vec##n const v, uint8_t col_index) { \
 	uint8_t i; \
 	for (i = 0; i < n; ++i) { \
-		M[i][col_index] = v[i]; \
+		M[col_index][i] = v[i]; \
 	} \
 } \
 static inline void mat##n##x##n##_set_row(mat##n##x##n M, vec##n const v, uint8_t row_index) { \
 	uint8_t j; \
 	for (j = 0; j < n; ++j) { \
-		M[row_index][j] = v[j]; \
+		M[j][row_index] = v[j]; \
 	} \
 }
 
@@ -313,7 +316,7 @@ static inline void mat4x4_mul(mat4x4 M, mat4x4 const a, mat4x4 const b) {
 	mat4x4_dup(M, M_temp);
 }
 
-static inline void mat4x4_translate(mat4x4 T, float x, float y, float z) {
+static inline void mat4x4_translate_to(mat4x4 T, float x, float y, float z) {
 	mat4x4_identity(T);
 	T[3][0] = x;
 	T[3][1] = y;
@@ -347,8 +350,12 @@ static inline void mat4x4_rotate(mat4x4 R, mat4x4 const M, float x, float y,
 		mat4x4 T;
 		mat4x4_from_vec3_mul_outer(T, u, u);
 
-		mat4x4 S = { { 0, u[2], -u[1], 0 }, { -u[2], 0, u[0], 0 }, { u[1],
-				-u[0], 0, 0 }, { 0, 0, 0, 0 } };
+		mat4x4 S = {
+			{    0,  u[2], -u[1], 0},
+			{-u[2],     0,  u[0], 0},
+			{ u[1], -u[0],     0, 0},
+			{    0,     0,     0, 0}
+		};
 		mat4x4_scale(S, S, s);
 
 		mat4x4 C;
