@@ -72,12 +72,12 @@ void Cube_Init(Cube* cube, float size) {
 	Cube_InitVertices(cube);
 	Cube_InitColors(cube);
 	mat4x4_identity(cube->model);
-	mat4x4_scale_self(cube->model, size);
+	Cube_Scale(cube, size);
 }
 
 
 void Cube_Scale(Cube* cube, float scale) {
-	mat4x4_scale_self(cube->model, scale);
+	mat4x4_scale_aniso(cube->model, cube->model, scale, scale, scale);
 }
 
 

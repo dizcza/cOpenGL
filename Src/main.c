@@ -131,7 +131,7 @@ int main(void) {
 	Depth_SDRAM_TestReadWrite();
 
 	Cube cube;
-	Cube_Init(&cube, 4.5);
+	Cube_Init(&cube, 1.0);
 	mat4x4_rotate_Y(cube.model, cube.model, 10.0 * 3.14 / 180);
 	mat4x4_rotate_Z(cube.model, cube.model, 10.0 * 3.14 / 180);
 	mat4x4_rotate_X(cube.model, cube.model, 10.0 * 3.14 / 180);
