@@ -11,11 +11,7 @@
 #include "colors.h"
 #include "debug_printf.h"
 #include "depth_sdram.h"
-
-#include <stdlib.h> // todo: use hardware random generator
-
-static uint32_t m_active_layer_id;
-
+#include "framehandler.h"
 
 static void FrameBuffer_Clear2(FrameBuffer* frame, uint32_t color) {
 	BSP_LCD_Clear(color);
@@ -49,7 +45,9 @@ static void FrameBuffer_ProjectNdcPointToScreen(const FrameBuffer* frame, vec3 s
 	screen[2] = ndc[2];
 }
 
-void FrameBuffer_Init(FrameBuffer* frame, uint16_t width, uint16_t height) {
+
+void FrameBuffer_Init(FrameBuffer* frame, uint32_t frm_id, uint16_t width, uint16_t height) {
+	frame->frame_id = frm_id;
 	frame->width = width;
 	frame->height = height;
 	frame->aspect = (float) width / height;
@@ -75,13 +73,7 @@ void FrameBuffer_Clear(FrameBuffer* frame, uint32_t color) {
 
 
 void FrameBuffer_Flush(FrameBuffer* frame) {
-	uint16_t x, y;
-//	for (x = 0; x < TFTWIDTH; ++x) {
-//		for (y = 0; y < TFTHEIGHT; ++y) {
-			//BSP_LCD_DrawPixel(x, y, frame->color[y][x]);
-			//BSP_LCD_DrawPixel(x, y, LCD_COLOR_MAGENTA);
-//		}
-//	}
+	//frame->onChangesDrawn();
 }
 
 

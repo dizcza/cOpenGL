@@ -12,6 +12,7 @@
 #include "camera.h"
 
 typedef struct FrameBuffer {
+	uint32_t frame_id;
 	uint16_t width, height;
 	float aspect;
 
@@ -21,8 +22,7 @@ typedef struct FrameBuffer {
 	float (*ReadDepth)(uint16_t x, uint16_t y);
 } FrameBuffer;
 
-void FrameBuffer_Init(FrameBuffer* frame, uint16_t width, uint16_t height);
-void FrameBuffer_Flush(FrameBuffer* frame);
+void FrameBuffer_Init(FrameBuffer* frame, uint32_t frm_id, uint16_t width, uint16_t height);
 void FrameBuffer_Clear(FrameBuffer* frame, uint32_t color);
 void FrameBuffer_DrawCube(FrameBuffer* frame, const Camera* camera, const Cube* cube);
 

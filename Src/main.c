@@ -140,17 +140,17 @@ int main(void) {
 	Camera camera;
 	Camera_Init(&camera);
 
-	FrameBuffer frame;
-	FrameBuffer_Init(&frame, BSP_LCD_GetXSize(), BSP_LCD_GetYSize());
+	FrameHandler_Init(BSP_LCD_GetXSize(), BSP_LCD_GetYSize());
+	FrameBuffer* frame = FrameHandler_getActiveFrame();
+	FrameBuffer_DrawCube(frame, &camera, &cube);
+	FrameHandler_onReadyToDraw(frame);
 
-	FrameBuffer_DrawCube(&frame, &camera, &cube);
-	FrameBuffer_Flush(&frame);
+	BSP_LCD_SetLayerVisible(1, DISABLE);
 
 //	BSP_LCD_SelectLayer(0);
 //	FrameBuffer_Clear(&frame, LCD_COLOR_CYAN);
 //	Cube_Translate(&cube, -0.6, -0.2, 0);
 //	FrameBuffer_DrawCube(&frame, &camera, &cube);
-//	FrameBuffer_Flush(&frame);
 
 	//BSP_LCD_SetLayerVisible_NoReload(0, ENABLE);
 
