@@ -16,25 +16,30 @@
 
 static uint32_t m_active_layer_id;
 
-void FrameBuffer_Init(FrameBuffer* frame, uint16_t width, uint16_t height) {
-	frame->width = width;
-	frame->height = height;
-	frame->aspect = (float) width / height;
-	frame->DrawPixel = BSP_LCD_DrawPixel;
-	frame->ReadPixel = BSP_LCD_ReadPixel;
-	frame->WriteDepth = Depth_SDRAM_WriteDepth;
-	frame->ReadDepth = Depth_SDRAM_ReadDepth;
-	FrameBuffer_Clear(frame, LCD_COLOR_BLACK);
-}
 
-void FrameBuffer_Clear(FrameBuffer* frame, uint32_t color) {
-	int16_t x, y;
+static void FrameBuffer_Clear2(FrameBuffer* frame, uint32_t color) {
+	BSP_LCD_Clear(color);
+	uint16_t x, y;
 	for (x = 0; x < frame->width; ++x) {
 		for (y = 0; y < frame->height; ++y) {
 			frame->WriteDepth(x, y, 1.0f);
-			frame->DrawPixel(x, y, color);
 		}
 	}
+}
+
+
+static void FrameBuffer_TestClearSpeed(FrameBuffer* frame) {
+	uint32_t i, probes = 1;
+	uint32_t start = HAL_GetTick();
+	for (i = 0; i < probes; ++i) {
+		FrameBuffer_Clear(frame, LCD_COLOR_YELLOW);
+	}
+	uint32_t finish1 = HAL_GetTick();
+	for (i = 0; i < probes; ++i) {
+		FrameBuffer_Clear2(frame, LCD_COLOR_YELLOW);
+	}
+	uint32_t finish2 = HAL_GetTick();
+	db_printf("dur %lu %lu \n", finish1 - start, finish2 - finish1);
 }
 
 
@@ -44,8 +49,33 @@ static void FrameBuffer_ProjectNdcPointToScreen(const FrameBuffer* frame, vec3 s
 	screen[2] = ndc[2];
 }
 
+void FrameBuffer_Init(FrameBuffer* frame, uint16_t width, uint16_t height) {
+	frame->width = width;
+	frame->height = height;
+	frame->aspect = (float) width / height;
+	frame->DrawPixel = BSP_LCD_DrawPixel;
+	frame->ReadPixel = BSP_LCD_ReadPixel;
+	frame->WriteDepth = Depth_SDRAM_WriteDepth;
+	frame->ReadDepth = Depth_SDRAM_ReadDepth;
+	FrameBuffer_Clear(frame, LCD_COLOR_BLACK);
+#ifdef DEBUG
+	//FrameBuffer_TestClearSpeed(frame);
+#endif /* DEBUG */
+}
+
+void FrameBuffer_Clear(FrameBuffer* frame, uint32_t color) {
+	uint16_t x, y;
+	for (x = 0; x < frame->width; ++x) {
+		for (y = 0; y < frame->height; ++y) {
+			frame->WriteDepth(x, y, 1.0f);
+			frame->DrawPixel(x, y, color);
+		}
+	}
+}
+
+
 void FrameBuffer_Flush(FrameBuffer* frame) {
-	int16_t x, y;
+	uint16_t x, y;
 //	for (x = 0; x < TFTWIDTH; ++x) {
 //		for (y = 0; y < TFTHEIGHT; ++y) {
 			//BSP_LCD_DrawPixel(x, y, frame->color[y][x]);
@@ -55,9 +85,9 @@ void FrameBuffer_Flush(FrameBuffer* frame) {
 }
 
 
-void FrameBuffer_FillTrian(FrameBuffer* frame, trian3 const trian_xyz, vec3uint32 const colors) {
+void FrameBuffer_FillTrian(FrameBuffer* frame, trian3 const trian_xyz, vec3uint32 const vcolors) {
 	mat3x3 m_rgb;
-	Colors_fRgbFromHexMat(m_rgb, colors);
+	Colors_fRgbFromHexMat(m_rgb, vcolors);
 	vec3 fv_rgb;
 
 	uint16_t y, x;
@@ -86,7 +116,7 @@ void FrameBuffer_FillTrian(FrameBuffer* frame, trian3 const trian_xyz, vec3uint3
 	}
 }
 
-void FrameBuffer_ProjectTrian4(FrameBuffer* frame, trian4 const trian, mat4x4 const mvp) {
+void FrameBuffer_ProjectTrian4(FrameBuffer* frame, trian4 const trian, vec3uint32 const vcolors, mat4x4 const mvp) {
 	uint8_t i;
 	trian3 trian_xyz;
 	for (i = 0; i < 3; ++i) {
@@ -95,14 +125,7 @@ void FrameBuffer_ProjectTrian4(FrameBuffer* frame, trian4 const trian, mat4x4 co
 		vec4_scale_self(ndc_point, 1.0 / ndc_point[3]);
 		FrameBuffer_ProjectNdcPointToScreen(frame, trian_xyz[i], ndc_point);
 	}
-	vec3uint32 colors;
-	for (i = 0; i < 3; ++i) {
-		colors[i] = abs(rand());
-	}
-	colors[0] = LCD_COLOR_RED;
-	colors[1] = LCD_COLOR_GREEN;
-	colors[2] = LCD_COLOR_BLUE;
-	FrameBuffer_FillTrian(frame, trian_xyz, colors);
+	FrameBuffer_FillTrian(frame, trian_xyz, vcolors);
 }
 
 
@@ -114,10 +137,11 @@ void FrameBuffer_DrawCube(FrameBuffer* frame, const Camera* camera, const Cube* 
 	mat4x4_mul(mvp, vp, cube->model);
 
 	trian4 trian;
+	vec3uint32 vcolors;
 	uint8_t tr_id;
 	for (tr_id = 0; tr_id < CUBE_TRIANGLE_COUNT; ++tr_id) {
-		Cube_GetTrianlge(cube, trian, tr_id);
-		FrameBuffer_ProjectTrian4(frame, trian, mvp);
+		Cube_GetTriangle(cube, trian, vcolors, tr_id);
+		FrameBuffer_ProjectTrian4(frame, trian, vcolors, mvp);
 	}
 }
 

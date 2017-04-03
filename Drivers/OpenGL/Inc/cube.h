@@ -19,6 +19,7 @@
 typedef struct Cube {
 	mat4x4 model;
 	vec4 vertices[CUBE_VERTEX_COUNT];
+	uint32_t colors[CUBE_VERTEX_COUNT];
 	uint8_t indices[CUBE_INDEX_COUNT];
 } Cube;
 
@@ -28,6 +29,6 @@ void Cube_Scale(Cube* cube, float scale);
 void Cube_Translate(Cube* cube, float x, float y, float z);
 void Cube_Rotate(Cube* cube, quat const q);
 
-void Cube_GetTrianlge(const Cube* cube, trian4 trian, uint8_t tr_id);
+void Cube_GetTriangle(const Cube* cube, trian4 trian, vec3uint32 colors, uint8_t tr_id);
 
 #endif /* CUBE_H_ */

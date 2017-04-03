@@ -131,11 +131,11 @@ int main(void) {
 	Depth_SDRAM_TestReadWrite();
 
 	Cube cube;
-	Cube_Init(&cube, 1.0);
+	Cube_Init(&cube, 4.5);
 	mat4x4_rotate_Y(cube.model, cube.model, 10.0 * 3.14 / 180);
 	mat4x4_rotate_Z(cube.model, cube.model, 10.0 * 3.14 / 180);
 	mat4x4_rotate_X(cube.model, cube.model, 10.0 * 3.14 / 180);
-	Cube_Translate(&cube, 0.2, 0, 0);
+	//Cube_Translate(&cube, 0.2, 0, 0);
 
 	Camera camera;
 	Camera_Init(&camera);
@@ -146,11 +146,11 @@ int main(void) {
 	FrameBuffer_DrawCube(&frame, &camera, &cube);
 	FrameBuffer_Flush(&frame);
 
-	BSP_LCD_SelectLayer(0);
-	FrameBuffer_Clear(&frame, LCD_COLOR_CYAN);
-	Cube_Translate(&cube, -0.6, -0.2, 0);
-	FrameBuffer_DrawCube(&frame, &camera, &cube);
-	FrameBuffer_Flush(&frame);
+//	BSP_LCD_SelectLayer(0);
+//	FrameBuffer_Clear(&frame, LCD_COLOR_CYAN);
+//	Cube_Translate(&cube, -0.6, -0.2, 0);
+//	FrameBuffer_DrawCube(&frame, &camera, &cube);
+//	FrameBuffer_Flush(&frame);
 
 	//BSP_LCD_SetLayerVisible_NoReload(0, ENABLE);
 

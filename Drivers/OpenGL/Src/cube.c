@@ -7,6 +7,7 @@
 
 
 #include "cube.h"
+#include "debug_printf.h"
 
 static const uint8_t m_indices[CUBE_INDEX_COUNT] = {
 		0, 1, 2,
@@ -28,6 +29,16 @@ static const uint8_t m_indices[CUBE_INDEX_COUNT] = {
 		3, 6, 7
 };
 
+static const uint32_t m_colors[CUBE_VERTEX_COUNT] = {
+		0xFFFF0000, // RED
+		0xFF00FF00, // GREEN
+		0xFF0000FF, // BLUE
+		0xFF00FFFF, // CYAN
+		0xFFFF00FF, // MAGENTA
+		0xFFFFFF00, // YELLOW
+		0xFFA52A2A, // BROWN
+		0xFFFFA500  // ORANGE
+};
 
 static void Cube_InitIndices(Cube* cube) {
 	uint8_t i;
@@ -49,9 +60,17 @@ static void Cube_InitVertices(Cube* cube) {
 	vec4_set(cube->vertices[7],  - half_sz,  + half_sz,  - half_sz, 1.0);
 }
 
+static void Cube_InitColors(Cube* cube) {
+	uint8_t i;
+	for (i = 0; i < CUBE_VERTEX_COUNT; ++i) {
+		cube->colors[i] = m_colors[i];
+	}
+}
+
 void Cube_Init(Cube* cube, float size) {
 	Cube_InitIndices(cube);
 	Cube_InitVertices(cube);
+	Cube_InitColors(cube);
 	mat4x4_identity(cube->model);
 	mat4x4_scale_self(cube->model, size);
 }
@@ -67,10 +86,14 @@ void Cube_Translate(Cube* cube, float x, float y, float z) {
 }
 
 // in 3D space
-void Cube_GetTrianlge(const Cube* cube, trian4 trian, uint8_t tr_id) {
+void Cube_GetTriangle(const Cube* cube, trian4 trian, vec3uint32 colors, uint8_t tr_id) {
 	uint8_t index;
 	for (index = 3 * tr_id; index < 3 * (tr_id + 1); ++index) {
+		const uint8_t tr_pid = index % 3;
 		uint8_t vid = cube->indices[index];
-		mat4x4_mul_vec4(trian[index % 3], cube->model, cube->vertices[vid]);
+		colors[tr_pid] = cube->colors[vid];
+		db_printf("tr %d, vid %d, tr_pid %d, color 0x%08x\n", tr_id, vid, tr_pid, colors[tr_pid]);
+		HAL_Delay(100);
+		mat4x4_mul_vec4(trian[tr_pid], cube->model, cube->vertices[vid]);
 	}
 }
