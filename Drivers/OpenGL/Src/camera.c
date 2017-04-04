@@ -6,14 +6,12 @@
  */
 
 #include "camera.h"
-#include "linmath.h"
 
 void Camera_Init(Camera* camera) {
 	vec3 target = { 0, 0, -1 };
 	vec3 eye = { 0, 0, 1 };
 	vec3 up = { 0, 1, 0 };
 	mat4x4_look_at(camera->view, eye, target, up);
-
 	mat4x4_ortho(camera->proj, -1, 1, -1, 1, 0, 50);
 }
 

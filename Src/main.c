@@ -46,7 +46,7 @@
 
 #include "cube.h"
 #include "camera.h"
-#include "framebuffer.h"
+#include "framehandler.h"
 #include "depth_sdram.h"
 
 #include "debug_printf.h"
@@ -131,21 +131,29 @@ int main(void) {
 	Depth_SDRAM_TestReadWrite();
 
 	Cube cube;
-	Cube_Init(&cube, 1.0);
-	mat4x4_rotate_Y(cube.model, cube.model, 10.0 * 3.14 / 180);
-	mat4x4_rotate_Z(cube.model, cube.model, 10.0 * 3.14 / 180);
-	mat4x4_rotate_X(cube.model, cube.model, 10.0 * 3.14 / 180);
-	//Cube_Translate(&cube, 0.2, 0, 0);
+	Cube_Init(&cube, 0.5f);
+
+	mat4x4_rotate_Y(cube.model, cube.model, 30.0 * 3.14 / 180);
+	mat4x4_rotate_Z(cube.model, cube.model, 30.0 * 3.14 / 180);
+	mat4x4_rotate_X(cube.model, cube.model, 30.0 * 3.14 / 180);
+	Cube_Translate(&cube, 0.0, -1, 0.0);
 
 	Camera camera;
 	Camera_Init(&camera);
 
 	FrameHandler_Init(BSP_LCD_GetXSize(), BSP_LCD_GetYSize());
-	FrameBuffer* frame = FrameHandler_getActiveFrame();
-	FrameBuffer_DrawCube(frame, &camera, &cube);
-	FrameHandler_onReadyToDraw(frame);
+	FrameHandler_DrawCube(&camera, &cube);
+	FrameHandler_glFlush();
 
-	BSP_LCD_SetLayerVisible(1, DISABLE);
+	Cube_Translate(&cube, 0.0, 1.4, 0.0);
+	//BSP_LCD_SetLayerVisible(1, DISABLE);
+	//BSP_LCD_SelectLayer(0);
+	//BSP_LCD_Clear(LCD_COLOR_CYAN);
+	//BSP_LCD_SetLayerVisible(0, ENABLE);
+	//BSP_LCD_DrawRect(40, 40, 100, 100);
+
+	FrameHandler_DrawCube(&camera, &cube);
+	FrameHandler_glFlush();
 
 //	BSP_LCD_SelectLayer(0);
 //	FrameBuffer_Clear(&frame, LCD_COLOR_CYAN);

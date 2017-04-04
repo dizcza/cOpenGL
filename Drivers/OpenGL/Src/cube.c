@@ -82,18 +82,17 @@ void Cube_Scale(Cube* cube, float scale) {
 
 
 void Cube_Translate(Cube* cube, float x, float y, float z) {
-	mat4x4_translate_in_place(cube->model, x, y, z);
+	mat4x4_translate_gl(cube->model, x, y, z);
 }
 
 // in 3D space
 void Cube_GetTriangle(const Cube* cube, trian4 trian, vec3uint32 colors, uint8_t tr_id) {
 	uint8_t index;
 	for (index = 3 * tr_id; index < 3 * (tr_id + 1); ++index) {
-		const uint8_t tr_pid = index % 3;
+		const uint8_t local_pid = index % 3;
 		uint8_t vid = cube->indices[index];
-		colors[tr_pid] = cube->colors[vid];
-		db_printf("tr %d, vid %d, tr_pid %d, color 0x%08x\n", tr_id, vid, tr_pid, colors[tr_pid]);
-		HAL_Delay(100);
-		mat4x4_mul_vec4(trian[tr_pid], cube->model, cube->vertices[vid]);
+		colors[local_pid] = cube->colors[vid];
+		vec4_dup(trian[local_pid], cube->vertices[vid]);
+		db_printf("tr %d, vid %d, local_pid %d, color 0x%08x\n", tr_id, vid, local_pid, colors[local_pid]);
 	}
 }

@@ -11,33 +11,6 @@
 #include "colors.h"
 #include "debug_printf.h"
 #include "depth_sdram.h"
-#include "framehandler.h"
-
-static void FrameBuffer_Clear2(FrameBuffer* frame, uint32_t color) {
-	BSP_LCD_Clear(color);
-	uint16_t x, y;
-	for (x = 0; x < frame->width; ++x) {
-		for (y = 0; y < frame->height; ++y) {
-			frame->WriteDepth(x, y, 1.0f);
-		}
-	}
-}
-
-
-static void FrameBuffer_TestClearSpeed(FrameBuffer* frame) {
-	uint32_t i, probes = 1;
-	uint32_t start = HAL_GetTick();
-	for (i = 0; i < probes; ++i) {
-		FrameBuffer_Clear(frame, LCD_COLOR_YELLOW);
-	}
-	uint32_t finish1 = HAL_GetTick();
-	for (i = 0; i < probes; ++i) {
-		FrameBuffer_Clear2(frame, LCD_COLOR_YELLOW);
-	}
-	uint32_t finish2 = HAL_GetTick();
-	db_printf("dur %lu %lu \n", finish1 - start, finish2 - finish1);
-}
-
 
 static void FrameBuffer_ProjectNdcPointToScreen(const FrameBuffer* frame, vec3 screen, vec4 ndc) {
 	screen[0] = (ndc[0] + 1) / 2.0 * frame->width;
@@ -56,9 +29,6 @@ void FrameBuffer_Init(FrameBuffer* frame, uint32_t frm_id, uint16_t width, uint1
 	frame->WriteDepth = Depth_SDRAM_WriteDepth;
 	frame->ReadDepth = Depth_SDRAM_ReadDepth;
 	FrameBuffer_Clear(frame, LCD_COLOR_BLACK);
-#ifdef DEBUG
-	//FrameBuffer_TestClearSpeed(frame);
-#endif /* DEBUG */
 }
 
 void FrameBuffer_Clear(FrameBuffer* frame, uint32_t color) {
@@ -69,11 +39,6 @@ void FrameBuffer_Clear(FrameBuffer* frame, uint32_t color) {
 			frame->DrawPixel(x, y, color);
 		}
 	}
-}
-
-
-void FrameBuffer_Flush(FrameBuffer* frame) {
-	//frame->onChangesDrawn();
 }
 
 

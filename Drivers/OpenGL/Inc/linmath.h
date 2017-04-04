@@ -332,6 +332,12 @@ static inline void mat4x4_translate_in_place(mat4x4 M, float x, float y,
 		M[3][i] += vec4_mul_inner(r, t);
 	}
 }
+static inline void mat4x4_translate_gl(mat4x4 M, float x, float y,
+		float z) {
+	M[3][0] += x;
+	M[3][1] += y;
+	M[3][2] += z;
+}
 static inline void mat4x4_from_vec3_mul_outer(mat4x4 M, vec3 const a,
 		vec3 const b) {
 	int i, j;

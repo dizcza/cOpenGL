@@ -8,12 +8,17 @@
 #define FRAME_HANDLER_MAX_LAYERS 2
 #define CLEAR_COLOR LCD_COLOR_WHITE
 
-#include "framehandler.h"
 #include "stm32f429i_discovery_lcd.h"
+#include "framehandler.h"
+#include "framebuffer.h"
+
 
 static FrameBuffer m_frames[FRAME_HANDLER_MAX_LAYERS];
-static uint32_t m_active_frame_id = 0;
+static uint32_t m_drawing_frame_id = 1;
 
+static uint32_t inline FrameHandler_GetOtherFrameId() {
+	return (m_drawing_frame_id + 1) % FRAME_HANDLER_MAX_LAYERS;
+}
 
 void FrameHandler_Init(uint16_t width, uint16_t height) {
 	uint32_t frame_id;
@@ -22,18 +27,14 @@ void FrameHandler_Init(uint16_t width, uint16_t height) {
 	}
 }
 
-void FrameHandler_onReadyToDraw(FrameBuffer* frame) {
-	BSP_LCD_SetLayerVisible_NoReload(m_active_frame_id, DISABLE);
-	BSP_LCD_SetLayerVisible(frame->frame_id, ENABLE);
-	FrameBuffer_Clear(m_active_frame_id, CLEAR_COLOR);
-	m_active_frame_id = frame->frame_id;
+void FrameHandler_DrawCube(const Camera* camera, const Cube* cube) {
+	FrameBuffer_DrawCube(&m_frames[m_drawing_frame_id], camera, cube);
 }
 
-FrameBuffer* FrameHandler_getActiveFrame() {
-	return &m_frames[m_active_frame_id];
-}
-
-FrameBuffer* FrameHandler_getBackgrFrame() {
-	uint32_t backrg_id = (m_active_frame_id + 1) % FRAME_HANDLER_MAX_LAYERS;
-	return &m_frames[backrg_id];
+void FrameHandler_glFlush() {
+	BSP_LCD_SetLayerVisible_NoReload(FrameHandler_GetOtherFrameId(), DISABLE);
+	BSP_LCD_SetLayerVisible(m_drawing_frame_id, ENABLE);
+	m_drawing_frame_id = FrameHandler_GetOtherFrameId();
+	BSP_LCD_SelectLayer(m_drawing_frame_id);
+	FrameBuffer_Clear(&m_frames[m_drawing_frame_id], CLEAR_COLOR);
 }

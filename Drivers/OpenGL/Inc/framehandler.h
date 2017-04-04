@@ -8,11 +8,11 @@
 #ifndef OPENGL_INC_FRAMEHANDLER_H_
 #define OPENGL_INC_FRAMEHANDLER_H_
 
-#include "framebuffer.h"
+#include "cube.h"
+#include "camera.h"
 
 void FrameHandler_Init(uint16_t width, uint16_t height);
-FrameBuffer* FrameHandler_getActiveFrame();
-FrameBuffer* FrameHandler_getBackgrFrame();
-void FrameHandler_onReadyToDraw(FrameBuffer* frame);
+void FrameHandler_DrawCube(const Camera* camera, const Cube* cube);
+void FrameHandler_glFlush();
 
 #endif /* OPENGL_INC_FRAMEHANDLER_H_ */
