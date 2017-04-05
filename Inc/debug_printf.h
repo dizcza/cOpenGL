@@ -8,7 +8,7 @@
 #ifndef DEBUG_PRINTF_H_
 #define DEBUG_PRINTF_H_
 
-#define DEBUG1
+#define DEBUG
  #ifdef DEBUG
      #include "linmath.h"
      #include <stdio.h>

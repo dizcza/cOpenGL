@@ -13,9 +13,9 @@
 #define TRIANGLE_DEFINE_TRIAN(n) \
 typedef vec##n trian##n[3]; \
 static inline void trian##n##_init(trian##n trian, vec##n const v0, vec##n const v1, vec##n const v2) { \
-	vec##n##_copy(trian[0], v0); \
-	vec##n##_copy(trian[1], v1); \
-	vec##n##_copy(trian[2], v2); \
+	vec##n##_dup(trian[0], v0); \
+	vec##n##_dup(trian[1], v1); \
+	vec##n##_dup(trian[2], v2); \
 } \
 static inline void trian##n##_bbox(vec##n bmin, vec##n bmax, trian##n const trian) { \
 	vec##n##_pos_inf(bmin); \

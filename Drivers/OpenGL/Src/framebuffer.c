@@ -23,7 +23,6 @@ void FrameBuffer_Init(FrameBuffer* frame, uint32_t frm_id, uint16_t width, uint1
 	frame->frame_id = frm_id;
 	frame->width = width;
 	frame->height = height;
-	frame->aspect = (float) width / height;
 	frame->DrawPixel = BSP_LCD_DrawPixel;
 	frame->ReadPixel = BSP_LCD_ReadPixel;
 	frame->WriteDepth = Depth_SDRAM_WriteDepth;

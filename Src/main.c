@@ -38,17 +38,16 @@
 #include "fmc.h"
 
 /* USER CODE BEGIN Includes */
-#include "stdio.h"
 #include "stm32f429i_discovery.h"
 #include "stm32f429i_discovery_ts.h"
 #include "stm32f429i_discovery_io.h"
 #include "stm32f429i_discovery_lcd.h"
 
+#include "ts_calibration.h"
 #include "cube.h"
 #include "camera.h"
 #include "framehandler.h"
 #include "depth_sdram.h"
-
 #include "debug_printf.h"
 
 /* USER CODE END Includes */
@@ -94,9 +93,51 @@ void BSP_InitStuff() {
 	BSP_LCD_SetBackColor(0xFF00FF00);
 	BSP_LCD_Clear(LCD_COLOR_WHITE);
 
+	if (BSP_TS_Init(BSP_LCD_GetXSize(), BSP_LCD_GetYSize()) != TS_OK) {
+		Error_Handler();
+	}
+
+	if (IsCalibrationDone() == 0) {
+		Touchscreen_Calibration();
+	}
+
+	BSP_TS_ITConfig();
+
 	/* Set the LCD Text Color */
 	BSP_LCD_SetTextColor(LCD_COLOR_MAGENTA);
 	BSP_LCD_FillCircle(20, 300, 10);
+}
+
+void Cube_TouchMe() {
+	uint8_t status;
+	BSP_LCD_DrawRect(10, 10, 10, 10);
+	while (1) {
+		status = BSP_TS_ITGetStatus();
+		db_printf("status %d\n", status);
+		BSP_TS_ITClear();
+		if (status) {
+			BSP_LCD_DrawRect(100, 100, 40, 40);
+			db_printf("GOT!\n");
+		}
+	}
+	while (1) {
+		TS_StateTypeDef ts_state;
+		BSP_TS_GetState(&ts_state);
+		BSP_LCD_Clear(LCD_COLOR_WHITE);
+		if (ts_state.TouchDetected) {
+			uint16_t x = Calibration_GetX(ts_state.X);
+			uint16_t y = Calibration_GetY(ts_state.Y);
+			db_printf("x=%d y=%d ; ", x, y);
+			db_printf("xts=%d yts=%d\n", ts_state.X, ts_state.Y);
+			char str[20];
+			sprintf(str, "X=%d,Y=%d\n", ts_state.X, ts_state.Y);
+			BSP_LCD_DisplayStringAtLine(0, (uint8_t*) str);
+			sprintf(str, "X=%d,Y=%d\n", x, y);
+			BSP_LCD_DisplayStringAtLine(1, (uint8_t*) str);
+			//HAL_Delay(300);
+		}
+	}
+
 }
 
 /* USER CODE END 0 */
@@ -127,7 +168,8 @@ int main(void) {
 	/* USER CODE BEGIN 2 */
 	BSP_InitStuff();
 
-	Depth_SDRAM_Init(&hsdram1, DEPTH_SDRAM_START_ADRRES, BSP_LCD_GetXSize(), BSP_LCD_GetYSize());
+	Depth_SDRAM_Init(&hsdram1, DEPTH_SDRAM_START_ADRRES, BSP_LCD_GetXSize(),
+			BSP_LCD_GetYSize());
 	Depth_SDRAM_TestReadWrite();
 
 	Cube cube;
@@ -138,6 +180,9 @@ int main(void) {
 	mat4x4_rotate_X(cube.model, cube.model, 30.0 * 3.14 / 180);
 	Cube_Translate(&cube, 0.0, -1, 0.0);
 
+
+	Cube_TouchMe();
+
 	Camera camera;
 	Camera_Init(&camera);
 
@@ -146,21 +191,13 @@ int main(void) {
 	FrameHandler_glFlush();
 
 	Cube_Translate(&cube, 0.0, 1.4, 0.0);
-	//BSP_LCD_SetLayerVisible(1, DISABLE);
-	//BSP_LCD_SelectLayer(0);
-	//BSP_LCD_Clear(LCD_COLOR_CYAN);
-	//BSP_LCD_SetLayerVisible(0, ENABLE);
-	//BSP_LCD_DrawRect(40, 40, 100, 100);
-
 	FrameHandler_DrawCube(&camera, &cube);
 	FrameHandler_glFlush();
 
-//	BSP_LCD_SelectLayer(0);
-//	FrameBuffer_Clear(&frame, LCD_COLOR_CYAN);
-//	Cube_Translate(&cube, -0.6, -0.2, 0);
-//	FrameBuffer_DrawCube(&frame, &camera, &cube);
+	Cube_Translate(&cube, 0.0, -1.4, 0.0);
+	FrameHandler_DrawCube(&camera, &cube);
+	FrameHandler_glFlush();
 
-	//BSP_LCD_SetLayerVisible_NoReload(0, ENABLE);
 
 	/* USER CODE END 2 */
 
@@ -256,6 +293,7 @@ void SystemClock_Config(void) {
 void Error_Handler(void) {
 	/* USER CODE BEGIN Error_Handler */
 	/* User can add his own implementation to report the HAL error return state */
+	BSP_LED_On(LED4);
 	while (1) {
 	}
 	/* USER CODE END Error_Handler */

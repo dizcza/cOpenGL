@@ -44,6 +44,7 @@
 /* USER CODE BEGIN Private defines */
 #define HAL_SPI_MODULE_ENABLED
 #define HAL_DMA2D_MODULE_ENABLED
+#define HAL_I2C_MODULE_ENABLED
 /* USER CODE END Private defines */
 
 /**
