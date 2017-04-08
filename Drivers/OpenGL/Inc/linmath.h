@@ -4,9 +4,14 @@
 #include <math.h>
 #include "stdint.h"
 #include "float.h"
+#include "assert.h"
+
+#define LINMATH_EPS 0.0001f
 
 #define min(x,y) (x < y ? x : y)
 #define max(x,y) (x > y ? x : y)
+#define clamp(x,a,b) (x < a ? a : (x > b ? b : x))
+
 
 #define LINMATH_H_DEFINE_VEC(n) \
 typedef float vec##n[n]; \
@@ -581,19 +586,17 @@ static inline void mat4x4_look_at(mat4x4 m, vec3 const eye, vec3 const center,
 }
 
 typedef float quat[4];
+#define quat_add vec4_add
+#define quat_sub vec4_sub
+#define quat_norm vec4_norm
+#define quat_norm_self vec4_norm_self
+#define quat_scale vec4_scale
+#define quat_scale_self vec4_scale_self
+#define quat_mul_inner vec4_mul_inner
+
 static inline void quat_identity(quat q) {
 	q[0] = q[1] = q[2] = 0.f;
 	q[3] = 1.f;
-}
-static inline void quat_add(quat r, quat const a, quat const b) {
-	int i;
-	for (i = 0; i < 4; ++i)
-		r[i] = a[i] + b[i];
-}
-static inline void quat_sub(quat r, quat const a, quat const b) {
-	int i;
-	for (i = 0; i < 4; ++i)
-		r[i] = a[i] - b[i];
 }
 static inline void quat_mul(quat r, quat const p, quat const q) {
 	vec3 w;
@@ -603,18 +606,6 @@ static inline void quat_mul(quat r, quat const p, quat const q) {
 	vec3_scale(w, q, p[3]);
 	vec3_add(r, r, w);
 	r[3] = p[3] * q[3] - vec3_mul_inner(p, q);
-}
-static inline void quat_scale(quat r, quat const v, float s) {
-	int i;
-	for (i = 0; i < 4; ++i)
-		r[i] = v[i] * s;
-}
-static inline float quat_inner_product(quat a, quat const b) {
-	float p = 0.f;
-	int i;
-	for (i = 0; i < 4; ++i)
-		p += b[i] * a[i];
-	return p;
 }
 static inline void quat_conj(quat r, quat const q) {
 	int i;
@@ -631,7 +622,6 @@ static inline void quat_rotate(quat r, float angle, vec3 const axis) {
 	r[3] = cosf(angle / 2);
 }
 
-#define quat_norm vec4_norm
 static inline void quat_mul_vec3(vec3 r, quat const q, vec3 const v) {
 	/*
 	 * Method by Fabian 'ryg' Giessen (of Farbrausch)
@@ -652,6 +642,55 @@ static inline void quat_mul_vec3(vec3 r, quat const q, vec3 const v) {
 	vec3_add(r, v, t);
 	vec3_add(r, r, u);
 }
+
+/*
+ * Interpolates v0 & v1 by parameter 0 <= t <= 1.
+ */
+static inline void quat_slerp(quat res, quat const v0, quat const v1, float t) {
+    // Only unit quaternions are valid rotations.
+    // Normalize to avoid undefined behavior.
+	assert(t <= 1.f && t >= 0.f);
+	quat v0_norm, v1_norm;
+	quat_norm(v0_norm, v0);
+	quat_norm(v1_norm, v1);
+
+    // Compute the cosine of the angle between the two vectors.
+    float dot = quat_mul_inner(v0_norm, v1_norm);
+    if (dot > 1.f - LINMATH_EPS) {
+        // If the inputs are too close for comfort, linearly interpolate
+        // and normalize the result.
+    	// Quaternion result = v0 + t*(v1 – v0);
+    	quat v_diff;
+    	quat_sub(v_diff, v1_norm, v0_norm);
+    	quat_scale_self(v_diff, t);
+    	quat_add(res, v0_norm, v_diff);
+    	quat_norm_self(res);
+        return;
+    }
+
+    // If the dot product is negative, the quaternions
+    // have opposite handed-ness and slerp won't take
+    // the shorter path. Fix by reversing one quaternion.
+    if (dot < 0.f) {
+    	quat_scale_self(v1_norm, -1);
+        dot = -dot;
+    }
+
+    dot = clamp(dot, -1.f, 1.f);              // Robustness: Stay within domain of acos()
+    float theta_0 = acosf(dot);            // theta_0 = angle between input vectors
+    float theta = theta_0*t;              // theta = angle between v0 and result
+
+    quat v2_norm;
+    quat_scale_self(v0_norm, dot);
+    quat_sub(v2_norm, v1_norm, v0_norm);  // Quaternion v2 = v1 – v0*dot;
+    quat_norm_self(v2_norm);              // { v0, v2 } is now an orthonormal basis
+
+    quat_scale_self(v0_norm, cosf(theta));
+    quat_scale_self(v2_norm, sinf(theta));
+    quat_add(res, v0_norm, v2_norm);      // v0*cos(theta) + v2_norm*sin(theta);
+}
+
+
 static inline void mat4x4_from_quat(mat4x4 M, quat const q) {
 	float a = q[3];
 	float b = q[0];
