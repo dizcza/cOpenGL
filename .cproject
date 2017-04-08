@@ -27,20 +27,24 @@
 							<builder buildPath="${workspace_loc:/cOpenGL}/Debug" id="fr.ac6.managedbuild.builder.gnu.cross.378800466" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="Gnu Make Builder" superClass="fr.ac6.managedbuild.builder.gnu.cross">
 								<outputEntries>
 									<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="outputPath" name="Debug"/>
+									<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="outputPath" name="Release"/>
 								</outputEntries>
 							</builder>
 							<tool id="fr.ac6.managedbuild.tool.gnu.cross.c.compiler.1677118262" name="MCU GCC Compiler" superClass="fr.ac6.managedbuild.tool.gnu.cross.c.compiler">
 								<option defaultValue="gnu.c.optimization.level.none" id="fr.ac6.managedbuild.gnu.c.compiler.option.optimization.level.1262727919" name="Optimization Level" superClass="fr.ac6.managedbuild.gnu.c.compiler.option.optimization.level" useByScannerDiscovery="false" value="fr.ac6.managedbuild.gnu.c.optimization.level.none" valueType="enumerated"/>
 								<option id="gnu.c.compiler.option.debugging.level.152331537" name="Debug Level" superClass="gnu.c.compiler.option.debugging.level" useByScannerDiscovery="false" value="gnu.c.debugging.level.max" valueType="enumerated"/>
 								<option id="gnu.c.compiler.option.include.paths.750486387" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
-									<listOptionValue builtIn="false" value="../Inc"/>
-									<listOptionValue builtIn="false" value="../Drivers/OpenGL/Inc"/>
-									<listOptionValue builtIn="false" value="../Drivers/BSP"/>
-									<listOptionValue builtIn="false" value="../Drivers/STM32F4xx_HAL_Driver_Additional/Inc"/>
-									<listOptionValue builtIn="false" value="../Drivers/STM32F4xx_HAL_Driver/Inc"/>
-									<listOptionValue builtIn="false" value="../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy"/>
-									<listOptionValue builtIn="false" value="../Drivers/CMSIS/Device/ST/STM32F4xx/Include"/>
-									<listOptionValue builtIn="false" value="../Drivers/CMSIS/Include"/>
+									<listOptionValue builtIn="false" value="/home/dizcza/Ac6/CubeMXOutput/cOpenGL/Inc"/>
+									<listOptionValue builtIn="false" value="../Drivers/linmath.h"/>
+									<listOptionValue builtIn="false" value="/home/dizcza/Ac6/CubeMXOutput/cOpenGL/Demo/Inc"/>
+									<listOptionValue builtIn="false" value="/home/dizcza/Ac6/CubeMXOutput/cOpenGL/Drivers/OpenGL/Inc"/>
+									<listOptionValue builtIn="false" value="/home/dizcza/Ac6/CubeMXOutput/cOpenGL/Drivers/BSP"/>
+									<listOptionValue builtIn="false" value="/home/dizcza/Ac6/CubeMXOutput/cOpenGL/Drivers/STM32F4xx_HAL_Driver_Additional/Inc"/>
+									<listOptionValue builtIn="false" value="/home/dizcza/Ac6/CubeMXOutput/cOpenGL/Drivers/STM32F4xx_HAL_Driver/Inc"/>
+									<listOptionValue builtIn="false" value="/home/dizcza/Ac6/CubeMXOutput/cOpenGL/Drivers/STM32F4xx_HAL_Driver/Inc/Legacy"/>
+									<listOptionValue builtIn="false" value="/home/dizcza/Ac6/CubeMXOutput/cOpenGL/Drivers/CMSIS/Device/ST/STM32F4xx/Include"/>
+									<listOptionValue builtIn="false" value="/home/dizcza/Ac6/CubeMXOutput/cOpenGL/Drivers/CMSIS/Include"/>
+									<listOptionValue builtIn="false" value="/home/dizcza/Ac6/CubeMXOutput/cOpenGL/Debug/"/>
 								</option>
 								<option id="gnu.c.compiler.option.preprocessor.def.symbols.343046650" name="Defined symbols (-D)" superClass="gnu.c.compiler.option.preprocessor.def.symbols" useByScannerDiscovery="false" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="__weak=&quot;__attribute__((weak))&quot;"/>
@@ -58,9 +62,7 @@
 							</tool>
 							<tool id="fr.ac6.managedbuild.tool.gnu.cross.c.linker.609325597" name="MCU GCC Linker" superClass="fr.ac6.managedbuild.tool.gnu.cross.c.linker">
 								<option id="fr.ac6.managedbuild.tool.gnu.cross.c.linker.script.1054914499" name="Linker Script (-T)" superClass="fr.ac6.managedbuild.tool.gnu.cross.c.linker.script" value="../STM32F429ZITx_FLASH.ld" valueType="string"/>
-								<option id="gnu.c.link.option.libs.376839302" name="Libraries (-l)" superClass="gnu.c.link.option.libs" valueType="libs">
-									<listOptionValue builtIn="false" value="m"/>
-								</option>
+								<option id="gnu.c.link.option.libs.376839302" name="Libraries (-l)" superClass="gnu.c.link.option.libs" valueType="libs"/>
 								<option id="gnu.c.link.option.paths.2037892865" name="Library search path (-L)" superClass="gnu.c.link.option.paths"/>
 								<option id="gnu.c.link.option.ldflags.2093083286" name="Linker flags" superClass="gnu.c.link.option.ldflags" value="-specs=nosys.specs -specs=nano.specs -specs=rdimon.specs -lc -lrdimon" valueType="string"/>
 								<inputType id="cdt.managedbuild.tool.gnu.c.linker.input.462131868" superClass="cdt.managedbuild.tool.gnu.c.linker.input">
@@ -72,7 +74,16 @@
 							<tool id="fr.ac6.managedbuild.tool.gnu.archiver.198184526" name="MCU GCC Archiver" superClass="fr.ac6.managedbuild.tool.gnu.archiver"/>
 							<tool id="fr.ac6.managedbuild.tool.gnu.cross.assembler.707082791" name="MCU GCC Assembler" superClass="fr.ac6.managedbuild.tool.gnu.cross.assembler">
 								<option id="gnu.both.asm.option.include.paths.1456951063" name="Include paths (-I)" superClass="gnu.both.asm.option.include.paths" valueType="includePath">
-									<listOptionValue builtIn="false" value=""/>
+									<listOptionValue builtIn="false" value="/home/dizcza/Ac6/CubeMXOutput/cOpenGL/Inc"/>
+									<listOptionValue builtIn="false" value="/home/dizcza/Ac6/CubeMXOutput/cOpenGL/Demo/Inc"/>
+									<listOptionValue builtIn="false" value="/home/dizcza/Ac6/CubeMXOutput/cOpenGL/Drivers/OpenGL/Inc"/>
+									<listOptionValue builtIn="false" value="/home/dizcza/Ac6/CubeMXOutput/cOpenGL/Drivers/BSP"/>
+									<listOptionValue builtIn="false" value="/home/dizcza/Ac6/CubeMXOutput/cOpenGL/Drivers/STM32F4xx_HAL_Driver_Additional/Inc"/>
+									<listOptionValue builtIn="false" value="/home/dizcza/Ac6/CubeMXOutput/cOpenGL/Drivers/STM32F4xx_HAL_Driver/Inc"/>
+									<listOptionValue builtIn="false" value="/home/dizcza/Ac6/CubeMXOutput/cOpenGL/Drivers/STM32F4xx_HAL_Driver/Inc/Legacy"/>
+									<listOptionValue builtIn="false" value="/home/dizcza/Ac6/CubeMXOutput/cOpenGL/Drivers/CMSIS/Device/ST/STM32F4xx/Include"/>
+									<listOptionValue builtIn="false" value="/home/dizcza/Ac6/CubeMXOutput/cOpenGL/Drivers/CMSIS/Include"/>
+									<listOptionValue builtIn="false" value="/home/dizcza/Ac6/CubeMXOutput/cOpenGL/Debug/"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.1037392656" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
 								<inputType id="fr.ac6.managedbuild.tool.gnu.cross.assembler.input.1957703936" superClass="fr.ac6.managedbuild.tool.gnu.cross.assembler.input"/>
@@ -80,6 +91,7 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Demo"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Drivers"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Inc"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Src"/>
@@ -163,6 +175,7 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Demo"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Drivers"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Inc"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Src"/>

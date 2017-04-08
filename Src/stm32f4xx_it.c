@@ -101,14 +101,14 @@ void EXTI15_10_IRQHandler(void)
 {
   /* USER CODE BEGIN EXTI15_10_IRQn 0 */
 
-	TS_StateTypeDef ts_state;
-	BSP_TS_GetState(&ts_state);
-	if (ts_state.TouchDetected) {
-		char str[20];
-		sprintf("xts=%d yts=%d\n", ts_state.X, ts_state.Y);
-		BSP_LCD_DisplayStringAtLine(1, (uint8_t*) str);
-		db_printf("xts=%d yts=%d\n", ts_state.X, ts_state.Y);
-	}
+//	TS_StateTypeDef ts_state;
+//	BSP_TS_GetState(&ts_state);
+//	if (ts_state.TouchDetected) {
+//		char str[20];
+//		sprintf("xts=%d yts=%d\n", ts_state.X, ts_state.Y);
+//		BSP_LCD_DisplayStringAtLine(1, (uint8_t*) str);
+//		db_printf("xts=%d yts=%d\n", ts_state.X, ts_state.Y);
+//	}
 
   /* USER CODE END EXTI15_10_IRQn 0 */
   HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_15);

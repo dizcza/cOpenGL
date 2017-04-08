@@ -1,0 +1,3 @@
+[submodule "Drivers/linmath.h"]
+	path = Drivers/linmath.h
+	url = git@github.com:datenwolf/linmath.h.git

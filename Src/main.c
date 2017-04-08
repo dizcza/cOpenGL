@@ -50,6 +50,8 @@
 #include "depth_sdram.h"
 #include "debug_printf.h"
 
+#include "CubeRotationAnim.h"
+
 /* USER CODE END Includes */
 
 /* Private variables ---------------------------------------------------------*/
@@ -101,7 +103,7 @@ void BSP_InitStuff() {
 		Touchscreen_Calibration();
 	}
 
-	BSP_TS_ITConfig();
+	//BSP_TS_ITConfig();
 
 	/* Set the LCD Text Color */
 	BSP_LCD_SetTextColor(LCD_COLOR_MAGENTA);
@@ -172,6 +174,8 @@ int main(void) {
 			BSP_LCD_GetYSize());
 	Depth_SDRAM_TestReadWrite();
 
+	CubeRotationAnim_DemoRun();
+
 	Cube cube;
 	Cube_Init(&cube, 0.5f);
 
@@ -181,7 +185,7 @@ int main(void) {
 	Cube_Translate(&cube, 0.0, -1, 0.0);
 
 
-	Cube_TouchMe();
+//	Cube_TouchMe();
 
 	Camera camera;
 	Camera_Init(&camera);
