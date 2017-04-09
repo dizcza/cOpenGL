@@ -33,8 +33,8 @@ void FrameBuffer_Init(FrameBuffer* frame, uint32_t frm_id, uint16_t width, uint1
 void FrameBuffer_Clear(FrameBuffer* frame) {
 	uint16_t x, y;
 	BSP_LCD_Clear(LCD_COLOR_WHITE);
-	for (x = 0; x < frame->width; ++x) {
-		for (y = 0; y < frame->height; ++y) {
+	for (y = 0; y < frame->height; ++y) {
+		for (x = 0; x < frame->width; ++x) {
 			frame->WriteDepth(x, y, 1.0f);
 		}
 	}
@@ -61,7 +61,7 @@ void FrameBuffer_FillTrian(FrameBuffer* frame, trian3 const trian_xyz, vec3uint3
 			trian2_barycentric(baryc, trian_xy, p);
 			if (vec3_all_pos(baryc)) {
 				float p_depth = vec3_mul_inner(baryc, vdepths);
-				if (p_depth >= -1.0 && p_depth < frame->ReadDepth(x, y)) {
+				if (p_depth >= -1.0f && p_depth < frame->ReadDepth(x, y)) {
 					frame->WriteDepth(x, y, p_depth);
 					mat3x3_mul_vec3(fv_rgb, m_rgb, baryc);
 					uint32_t p_color = Colors_HexFromRgbf(fv_rgb);
