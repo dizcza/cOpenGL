@@ -168,7 +168,9 @@ int main(void)
 
 	Depth_SDRAM_Init(&hsdram2, DEPTH_SDRAM_START_ADRRES, BSP_LCD_GetXSize(),
 			BSP_LCD_GetYSize());
+#ifdef USE_FULL_ASSERT
 	Depth_SDRAM_TestReadWrite();
+#endif /* USE_FULL_ASSERT */
 
 	CubeRotationAnim_DemoRun();
 
