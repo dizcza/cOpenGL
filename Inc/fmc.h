@@ -46,7 +46,6 @@
 
 /* USER CODE END Includes */
 
-extern SDRAM_HandleTypeDef hsdram1;
 extern SDRAM_HandleTypeDef hsdram2;
 extern void Error_Handler(void);
 
