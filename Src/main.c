@@ -96,19 +96,11 @@ void BSP_InitStuff() {
 	BSP_LCD_SetBackColor(0xFF00FF00);
 	BSP_LCD_Clear(LCD_COLOR_WHITE);
 
-	if (BSP_TS_Init(BSP_LCD_GetXSize(), BSP_LCD_GetYSize()) != TS_OK) {
-		Error_Handler();
-	}
+	assert_param(BSP_TS_Init(BSP_LCD_GetXSize(), BSP_LCD_GetYSize()) == TS_OK);
 
 	if (IsCalibrationDone() == 0) {
 		Touchscreen_Calibration();
 	}
-
-	//BSP_TS_ITConfig();
-
-	/* Set the LCD Text Color */
-	BSP_LCD_SetTextColor(LCD_COLOR_MAGENTA);
-	BSP_LCD_FillCircle(20, 300, 10);
 }
 
 void Cube_TouchMe() {
@@ -173,8 +165,6 @@ int main(void) {
 #ifdef USE_FULL_ASSERT
 	Linmath_RunTests();
 #endif /* USE_FULL_ASSERT */
-
-	db_printf("my float %f\n", 3.124545f);
 
 	Depth_SDRAM_Init(&hsdram1, DEPTH_SDRAM_START_ADRRES, BSP_LCD_GetXSize(),
 			BSP_LCD_GetYSize());

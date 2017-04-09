@@ -27,7 +27,7 @@ void FrameBuffer_Init(FrameBuffer* frame, uint32_t frm_id, uint16_t width, uint1
 	frame->ReadPixel = BSP_LCD_ReadPixel;
 	frame->WriteDepth = Depth_SDRAM_WriteDepth;
 	frame->ReadDepth = Depth_SDRAM_ReadDepth;
-	FrameBuffer_Clear(frame, LCD_COLOR_BLACK);
+	FrameBuffer_Clear(frame, LCD_COLOR_WHITE);
 }
 
 void FrameBuffer_Clear(FrameBuffer* frame, uint32_t color) {
