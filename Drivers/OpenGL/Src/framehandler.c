@@ -6,7 +6,6 @@
  */
 
 #define FRAME_HANDLER_MAX_LAYERS 2
-#define CLEAR_COLOR LCD_COLOR_WHITE
 
 #include "stm32f429i_discovery_lcd.h"
 #include "framehandler.h"
@@ -38,7 +37,7 @@ void FrameHandler_glFlush() {
 	BSP_LCD_SetLayerVisible(m_drawing_frame_id, ENABLE);
 	m_drawing_frame_id = FrameHandler_GetOtherFrameId();
 	BSP_LCD_SelectLayer(m_drawing_frame_id);
-	FrameBuffer_Clear(&m_frames[m_drawing_frame_id], CLEAR_COLOR);
+	FrameBuffer_Clear(&m_frames[m_drawing_frame_id]);
 	if (m_flushes == 0) {
 		m_first_flush_timestamp = HAL_GetTick();
 	} else {

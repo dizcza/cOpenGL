@@ -27,15 +27,15 @@ void FrameBuffer_Init(FrameBuffer* frame, uint32_t frm_id, uint16_t width, uint1
 	frame->ReadPixel = BSP_LCD_ReadPixel;
 	frame->WriteDepth = Depth_SDRAM_WriteDepth;
 	frame->ReadDepth = Depth_SDRAM_ReadDepth;
-	FrameBuffer_Clear(frame, LCD_COLOR_WHITE);
+	FrameBuffer_Clear(frame);
 }
 
-void FrameBuffer_Clear(FrameBuffer* frame, uint32_t color) {
+void FrameBuffer_Clear(FrameBuffer* frame) {
 	uint16_t x, y;
+	BSP_LCD_Clear(LCD_COLOR_WHITE);
 	for (x = 0; x < frame->width; ++x) {
 		for (y = 0; y < frame->height; ++y) {
 			frame->WriteDepth(x, y, 1.0f);
-			frame->DrawPixel(x, y, color);
 		}
 	}
 }

@@ -22,7 +22,7 @@ typedef struct FrameBuffer {
 } FrameBuffer;
 
 void FrameBuffer_Init(FrameBuffer* frame, uint32_t frm_id, uint16_t width, uint16_t height);
-void FrameBuffer_Clear(FrameBuffer* frame, uint32_t color);
+void FrameBuffer_Clear(FrameBuffer* frame);
 void FrameBuffer_DrawCube(FrameBuffer* frame, const Camera* camera, const Cube* cube);
 
 #endif /* FRAMEBUFFER_H_ */
