@@ -45,6 +45,9 @@
 #define HAL_SPI_MODULE_ENABLED
 #define HAL_DMA2D_MODULE_ENABLED
 #define HAL_I2C_MODULE_ENABLED
+
+#define USE_FULL_ASSERT
+#define LCD_MAX_CHARS_LINE 20
 /* USER CODE END Private defines */
 
 /**

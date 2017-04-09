@@ -75,6 +75,15 @@ void Cube_Init(Cube* cube, float size) {
 	Cube_Scale(cube, size);
 }
 
+void Cube_RotateLocal(Cube* cube, quat const q) {
+	uint8_t i;
+	for (i = 0; i < CUBE_VERTEX_COUNT; ++i) {
+		vec3 r;
+		quat_mul_vec3(r, q, cube->vertices[i]);
+		vec3_dup(cube->vertices[i], r);
+		//quat_mul_vec3(cube->vertices[i], q, cube->vertices[i]);
+	}
+}
 
 void Cube_Scale(Cube* cube, float scale) {
 	mat4x4_scale_aniso(cube->model, cube->model, scale, scale, scale);
@@ -93,6 +102,6 @@ void Cube_GetTriangle(const Cube* cube, trian4 trian, vec3uint32 colors, uint8_t
 		uint8_t vid = cube->indices[index];
 		colors[local_pid] = cube->colors[vid];
 		vec4_dup(trian[local_pid], cube->vertices[vid]);
-		db_printf("tr %d, vid %d, local_pid %d, color 0x%08x\n", tr_id, vid, local_pid, colors[local_pid]);
+		//db_printf("tr %d, vid %d, local_pid %d, color 0x%08x\n", tr_id, vid, local_pid, colors[local_pid]);
 	}
 }

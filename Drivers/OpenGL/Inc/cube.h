@@ -27,7 +27,8 @@ void Cube_Init(Cube* cube, float size);
 
 void Cube_Scale(Cube* cube, float scale);
 void Cube_Translate(Cube* cube, float x, float y, float z);
-void Cube_Rotate(Cube* cube, quat const q);
+void Cube_RotateWorld(Cube* cube, quat const q);
+void Cube_RotateLocal(Cube* cube, quat const q);
 
 void Cube_GetTriangle(const Cube* cube, trian4 trian, vec3uint32 colors, uint8_t tr_id);
 

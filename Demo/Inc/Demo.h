@@ -5,9 +5,9 @@
  *      Author: dizcza
  */
 
-#ifndef INC_CUBEROTATIONANIM_H_
-#define INC_CUBEROTATIONANIM_H_
+#ifndef INC_DEMO_H_
+#define INC_DEMO_H_
 
 void CubeRotationAnim_DemoRun();
 
-#endif /* INC_CUBEROTATIONANIM_H_ */
+#endif /* INC_DEMO_H_ */

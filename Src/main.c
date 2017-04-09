@@ -31,6 +31,8 @@
  ******************************************************************************
  */
 /* Includes ------------------------------------------------------------------*/
+#include <Demo.h>
+#include <Demo.h>
 #include "main.h"
 #include "stm32f4xx_hal.h"
 #include "ltdc.h"
@@ -49,8 +51,7 @@
 #include "framehandler.h"
 #include "depth_sdram.h"
 #include "debug_printf.h"
-
-#include "CubeRotationAnim.h"
+#include "linmath_test.h"
 
 /* USER CODE END Includes */
 
@@ -129,8 +130,7 @@ void Cube_TouchMe() {
 		if (ts_state.TouchDetected) {
 			uint16_t x = Calibration_GetX(ts_state.X);
 			uint16_t y = Calibration_GetY(ts_state.Y);
-			db_printf("x=%d y=%d ; ", x, y);
-			db_printf("xts=%d yts=%d\n", ts_state.X, ts_state.Y);
+			db_printf("x=%d y=%d ; ", x, y);db_printf("xts=%d yts=%d\n", ts_state.X, ts_state.Y);
 			char str[20];
 			sprintf(str, "X=%d,Y=%d\n", ts_state.X, ts_state.Y);
 			BSP_LCD_DisplayStringAtLine(0, (uint8_t*) str);
@@ -170,38 +170,17 @@ int main(void) {
 	/* USER CODE BEGIN 2 */
 	BSP_InitStuff();
 
+#ifdef USE_FULL_ASSERT
+	Linmath_RunTests();
+#endif /* USE_FULL_ASSERT */
+
+	db_printf("my float %f\n", 3.124545f);
+
 	Depth_SDRAM_Init(&hsdram1, DEPTH_SDRAM_START_ADRRES, BSP_LCD_GetXSize(),
 			BSP_LCD_GetYSize());
 	Depth_SDRAM_TestReadWrite();
 
 	CubeRotationAnim_DemoRun();
-
-	Cube cube;
-	Cube_Init(&cube, 0.5f);
-
-	mat4x4_rotate_Y(cube.model, cube.model, 30.0 * 3.14 / 180);
-	mat4x4_rotate_Z(cube.model, cube.model, 30.0 * 3.14 / 180);
-	mat4x4_rotate_X(cube.model, cube.model, 30.0 * 3.14 / 180);
-	Cube_Translate(&cube, 0.0, -1, 0.0);
-
-
-//	Cube_TouchMe();
-
-	Camera camera;
-	Camera_Init(&camera);
-
-	FrameHandler_Init(BSP_LCD_GetXSize(), BSP_LCD_GetYSize());
-	FrameHandler_DrawCube(&camera, &cube);
-	FrameHandler_glFlush();
-
-	Cube_Translate(&cube, 0.0, 1.4, 0.0);
-	FrameHandler_DrawCube(&camera, &cube);
-	FrameHandler_glFlush();
-
-	Cube_Translate(&cube, 0.0, -1.4, 0.0);
-	FrameHandler_DrawCube(&camera, &cube);
-	FrameHandler_glFlush();
-
 
 	/* USER CODE END 2 */
 
@@ -297,8 +276,9 @@ void SystemClock_Config(void) {
 void Error_Handler(void) {
 	/* USER CODE BEGIN Error_Handler */
 	/* User can add his own implementation to report the HAL error return state */
-	BSP_LED_On(LED4);
 	while (1) {
+		BSP_LED_Toggle(LED4);
+		HAL_Delay(200);
 	}
 	/* USER CODE END Error_Handler */
 }
@@ -312,11 +292,37 @@ void Error_Handler(void) {
  * @param line: assert_param error line source number
  * @retval None
  */
-void assert_failed(uint8_t* file, uint32_t line)
-{
+void assert_failed(uint8_t* file, uint32_t line) {
 	/* USER CODE BEGIN 6 */
 	/* User can add his own implementation to report the file name and line number,
 	 ex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
+	db_printf("Wrong parameters value: file %s on line %d\r\n", file, line);
+	char msg[LCD_MAX_CHARS_LINE + 1];
+	BSP_LCD_SetBackColor(LCD_COLOR_WHITE);
+	BSP_LCD_SetTextColor(LCD_COLOR_RED);
+	BSP_LCD_SetFont(&Font16);
+	BSP_LCD_DisplayStringAtLine(0, (uint8_t*) "assert failed");
+	sprintf(msg, "on line %lu", line);
+	BSP_LCD_DisplayStringAtLine(1, (uint8_t*) msg);
+	BSP_LCD_SetFont(&Font12);
+
+	uint16_t lineid = 3;
+	int32_t msglen = 0;
+	while (file[msglen] != '\0') {
+		msglen++;
+	}
+	int32_t msg_start = 0, i;
+	while (msglen > msg_start) {
+		int32_t part_size = min(LCD_MAX_CHARS_LINE, msglen - msg_start);
+		for (i = 0; i < part_size; ++i) {
+			msg[i] = file[msg_start + i];
+		}
+		msg[part_size] = '\0';
+		BSP_LCD_DisplayStringAtLine(lineid, (uint8_t*) msg);
+		msg_start += part_size;
+		lineid++;
+	}
+	Error_Handler();
 	/* USER CODE END 6 */
 
 }
