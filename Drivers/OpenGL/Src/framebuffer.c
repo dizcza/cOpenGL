@@ -12,6 +12,8 @@
 #include "debug_printf.h"
 #include "depth_sdram.h"
 
+#define FRAME_CLEAR_COLOR  LCD_COLOR_WHITE
+
 static void FrameBuffer_ProjectNdcPointToScreen(const FrameBuffer* frame, vec3 screen, vec4 ndc) {
 	screen[0] = (ndc[0] + 1) / 2.0 * frame->width;
 	screen[1] = (1 - ndc[1]) / 2.0 * frame->width;
@@ -31,13 +33,8 @@ void FrameBuffer_Init(FrameBuffer* frame, uint32_t frm_id, uint16_t width, uint1
 }
 
 void FrameBuffer_Clear(FrameBuffer* frame) {
-	uint16_t x, y;
-	BSP_LCD_Clear(LCD_COLOR_WHITE);
-	for (y = 0; y < frame->height; ++y) {
-		for (x = 0; x < frame->width; ++x) {
-			frame->WriteDepth(x, y, 1.0f);
-		}
-	}
+	BSP_LCD_Clear(FRAME_CLEAR_COLOR);
+	Depth_SDRAM_ClearDepth();
 }
 
 
