@@ -5,6 +5,7 @@
  *      Author: dizcza
  */
 
+#include "main.h"
 #include "depth_sdram.h"
 #include "stm32f4xx_hal.h"
 
@@ -35,7 +36,7 @@ static uint32_t m_DeviceAddress;
 static uint32_t m_DmaAlreadyClearedPixels = 0;
 static uint32_t m_DmaLastPixChunkSize = 0;
 
-static __I  const float m_depth_initial = 1.0f;
+static __I const float m_depth_initial = 1.0f;
 
 void Depth_SDRAM_Init(SDRAM_HandleTypeDef* sdramHandle, uint32_t startAddress,
 		uint16_t lcd_width, uint16_t lcd_height) {
@@ -44,10 +45,10 @@ void Depth_SDRAM_Init(SDRAM_HandleTypeDef* sdramHandle, uint32_t startAddress,
 	m_LcdWidth = lcd_width;
 	m_LcdArea = lcd_width * lcd_height;
 	DMA_Config();
-#ifdef USE_FULL_ASSERT
+#ifdef USE_ASSERT_EXPR
 	Depth_SDRAM_TestReadWrite();
 	Depth_SDRAM_TestDmaWrite();
-#endif /* USE_FULL_ASSERT */
+#endif /* USE_ASSERT_EXPR */
 }
 
 static uint32_t inline Depth_SDRAM_GetPixelAddress(uint16_t x, uint16_t y) {
@@ -89,7 +90,8 @@ static void DMA_Config(void)
   m_DmaHandle.Instance = DMA_STREAM;
 
   /*##-4- Initialize the DMA stream ##########################################*/
-  assert_param(HAL_DMA_Init(&m_DmaHandle) == HAL_OK);
+  HAL_StatusTypeDef dmaInitStatus = HAL_DMA_Init(&m_DmaHandle);
+  assert_expr(dmaInitStatus == HAL_OK);
 
   /*##-5- Select Callbacks functions called after Transfer complete and Transfer error */
   HAL_DMA_RegisterCallback(&m_DmaHandle, HAL_DMA_XFER_CPLT_CB_ID, TransferComplete);
@@ -125,14 +127,12 @@ static void TransferComplete(DMA_HandleTypeDef *DmaHandle)
   */
 static void TransferError(DMA_HandleTypeDef *DmaHandle)
 {
-  /* Turn LED4 on: Transfer Error */
-  assert_param(0);
+  assert_expr(0);
 }
 
 static void TransferAbort(DMA_HandleTypeDef *DmaHandle)
 {
-  /* Turn LED4 on: Transfer Error */
-  assert_param(0);
+  assert_expr(0);
 }
 
 void Depth_SDRAM_WriteDepth(uint16_t x, uint16_t y, float depth) {
@@ -144,7 +144,8 @@ float Depth_SDRAM_ReadDepth(uint16_t x, uint16_t y) {
 }
 
 void Depth_SDRAM_ClearDepth() {
-	assert_param(WaitReadyDma(&m_DmaHandle, DEPTH_DMA_WAIT_READY_MS) == HAL_DMA_STATE_READY);
+	HAL_DMA_StateTypeDef dmaStatus = WaitReadyDma(&m_DmaHandle, DEPTH_DMA_WAIT_READY_MS);
+	assert_expr(dmaStatus == HAL_DMA_STATE_READY);
 	m_DmaLastPixChunkSize = m_LcdArea - m_DmaAlreadyClearedPixels;
 	if (m_DmaLastPixChunkSize > DEPTH_DMA_FLOAT_BUFFER_MAX_SIZE) {
 		m_DmaLastPixChunkSize = DEPTH_DMA_FLOAT_BUFFER_MAX_SIZE;
@@ -153,7 +154,7 @@ void Depth_SDRAM_ClearDepth() {
 								  (uint32_t)&(m_depth_initial),
 								  (uint32_t)(m_DeviceAddress + 4 * m_DmaAlreadyClearedPixels),
 								  m_DmaLastPixChunkSize);
-	assert_param(status == HAL_OK);
+	assert_expr(status == HAL_OK);
 }
 
 static void Depth_SDRAM_TestReadWrite() {
@@ -167,7 +168,7 @@ static void Depth_SDRAM_TestReadWrite() {
 			float depth_returned = Depth_SDRAM_ReadDepth(x, y);
 			float delta = depth_ref - depth_returned;
 			delta = delta > 0 ? delta : -delta;
-			assert_param(delta < 1e-6);
+			assert_expr(delta < 1e-5);
 		}
 	}
 }
@@ -186,7 +187,7 @@ static void Depth_SDRAM_TestDmaWrite() {
 			float depth = Depth_SDRAM_ReadDepth(x, y);
 			float delta = depth - m_depth_initial;
 			delta = delta > 0 ? delta : -delta;
-			assert_param(delta < 1e-6);
+			assert_expr(delta < 1e-5);
 		}
 	}
 }

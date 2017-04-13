@@ -8,8 +8,8 @@
 #ifndef DEBUG_PRINTF_H_
 #define DEBUG_PRINTF_H_
 
-#define DEBUG1
- #ifdef DEBUG
+#define DEBUG_CONSOLE1
+ #ifdef DEBUG_CONSOLE
 	 #include "linmath.h"
      #include <stdio.h>
      #include <stdlib.h>
@@ -47,5 +47,32 @@ static inline void db_printf_mat##n##x##n(mat##n##x##n const M) { \
 
 DB_DEFINE_PRINTF(3);
 DB_DEFINE_PRINTF(4);
+
+#define DEBUG_LCD
+#ifdef DEBUG_LCD
+#include "stm32f429i_discovery_lcd.h"
+#include <stdio.h>
+#include <stdarg.h>
+/**
+ * \brief Print the specified Text
+ *
+ * \param fmt	Format text
+ * \param
+ *
+ * \return void
+ */
+static uint16_t m_LcdLine = 0;
+static void inline LCD_Printf(const char *fmt, ...) {
+	static char buf[256];
+	va_list lst;
+	va_start(lst, fmt);
+	vsprintf(buf, fmt, lst);
+	va_end(lst);
+	BSP_LCD_DisplayStringAtLine(m_LcdLine, (uint8_t*) buf);
+	m_LcdLine = (m_LcdLine + 1) % 10;
+}
+#else
+#define LCD_Printf(...)
+#endif /* DEBUG_LCD */
 
 #endif /* DEBUG_PRINTF_H_ */

@@ -36,7 +36,7 @@
   /* Includes ------------------------------------------------------------------*/
 
 /* USER CODE BEGIN Includes */
-
+#include "stdint.h"
 /* USER CODE END Includes */
 
 /* Private define ------------------------------------------------------------*/
@@ -46,8 +46,19 @@
 #define HAL_DMA2D_MODULE_ENABLED
 #define HAL_I2C_MODULE_ENABLED
 
-#define USE_FULL_ASSERT
 #define LCD_MAX_CHARS_LINE 20
+
+/* Tests */
+#define USE_FULL_ASSERT
+#define USE_ASSERT_EXPR
+
+#ifdef USE_ASSERT_EXPR
+#define assert_expr(expr) ((expr) ? (void)0U : assert_expr_failed((uint8_t *)__FILE__, __LINE__))
+void assert_expr_failed(const uint8_t* file, uint32_t line);
+#else
+#define assert_expr(expr) ((void)0U)
+#endif /* assert_expr */
+
 /* USER CODE END Private defines */
 
 /**

@@ -7,6 +7,7 @@
 
 #include <Demo.h>
 #include "stm32f429i_discovery_lcd.h"
+#include <stdlib.h>
 
 #include "cube.h"
 #include "camera.h"
@@ -14,7 +15,8 @@
 #include "depth_sdram.h"
 #include "debug_printf.h"
 
-#define ROTATION_ANIM_DURATION_MS 3000
+#define ROTANIM_DURATION_MS 3000
+#define ROTANIM_CUBE_CNT    5
 
 extern void Assert_Cube(const Cube* cube);
 
@@ -32,11 +34,12 @@ void CubeRotationAnim_DemoRun() {
 	uint32_t last = HAL_GetTick();
 	while (1) {
 		uint32_t curr = HAL_GetTick();
-		uint32_t ms_passed = (curr - last) % ROTATION_ANIM_DURATION_MS;
-		float time_local = ((float)ms_passed) / ROTATION_ANIM_DURATION_MS;
+		uint32_t ms_passed = (curr - last) % ROTANIM_DURATION_MS;
+		float time_local = ((float)ms_passed) / ROTANIM_DURATION_MS;
 		float degrees = time_local * 180.f;
 		quat_rotate(q, degrees_to_rads(degrees), axis);
 		Cube_RotateLocal(&cube, q);
+		Assert_Cube(&cube);
 		FrameHandler_DrawCube(&camera, &cube);
 		FrameHandler_glFlush();
 		last = curr;

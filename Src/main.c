@@ -95,7 +95,8 @@ void BSP_InitStuff() {
 	BSP_LCD_SetBackColor(0xFF00FF00);
 	BSP_LCD_Clear(LCD_COLOR_WHITE);
 
-	assert_param(BSP_TS_Init(BSP_LCD_GetXSize(), BSP_LCD_GetYSize()) == TS_OK);
+	TS_StatusTypeDef ret = BSP_TS_Init(BSP_LCD_GetXSize(), BSP_LCD_GetYSize());
+	assert_expr(ret == TS_OK);
 
 	if (IsCalibrationDone() == 0) {
 		Touchscreen_Calibration();
@@ -162,9 +163,9 @@ int main(void)
   /* USER CODE BEGIN 2 */
 	BSP_InitStuff();
 
-#ifdef USE_FULL_ASSERT
+#ifdef USE_ASSERT_EXPR
 	Linmath_RunTests();
-#endif /* USE_FULL_ASSERT */
+#endif /* USE_ASSERT_EXPR */
 
 	Depth_SDRAM_Init(&hsdram2, DEPTH_SDRAM_START_ADRRES, BSP_LCD_GetXSize(),
 			BSP_LCD_GetYSize());
@@ -259,6 +260,46 @@ void SystemClock_Config(void)
 
 /* USER CODE BEGIN 4 */
 
+#ifdef USE_ASSERT_EXPR
+/**
+   * @brief Reports from non-HAL namespace
+   * where the assert_param error has occurred.
+   * @param file: pointer to the source file name
+   * @param line: assert_param error line source number
+   * @retval None
+   */
+void assert_expr_failed(const uint8_t* file, uint32_t line)
+{
+	db_printf("Wrong parameters value: file %s on line %d\r\n", file, line);
+	char msg[LCD_MAX_CHARS_LINE + 1];
+	BSP_LCD_SetBackColor(LCD_COLOR_WHITE);
+	BSP_LCD_SetTextColor(LCD_COLOR_RED);
+	BSP_LCD_SetFont(&Font16);
+	BSP_LCD_DisplayStringAtLine(0, (uint8_t*) "assert failed");
+	sprintf(msg, "on line %lu", line);
+	BSP_LCD_DisplayStringAtLine(1, (uint8_t*) msg);
+	BSP_LCD_SetFont(&Font12);
+
+	uint16_t lineid = 3;
+	int32_t msglen = 0;
+	while (file[msglen] != '\0') {
+		msglen++;
+	}
+	int32_t msg_start = 0, i;
+	while (msglen > msg_start) {
+		int32_t part_size = min(LCD_MAX_CHARS_LINE, msglen - msg_start);
+		for (i = 0; i < part_size; ++i) {
+			msg[i] = file[msg_start + i];
+		}
+		msg[part_size] = '\0';
+		BSP_LCD_DisplayStringAtLine(lineid, (uint8_t*) msg);
+		msg_start += part_size;
+		lineid++;
+	}
+	Error_Handler();
+}
+#endif /* USE_ASSERT_EXPR */
+
 /* USER CODE END 4 */
 
 /**
@@ -291,33 +332,7 @@ void assert_failed(uint8_t* file, uint32_t line)
   /* USER CODE BEGIN 6 */
 	/* User can add his own implementation to report the file name and line number,
 	 ex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
-	db_printf("Wrong parameters value: file %s on line %d\r\n", file, line);
-	char msg[LCD_MAX_CHARS_LINE + 1];
-	BSP_LCD_SetBackColor(LCD_COLOR_WHITE);
-	BSP_LCD_SetTextColor(LCD_COLOR_RED);
-	BSP_LCD_SetFont(&Font16);
-	BSP_LCD_DisplayStringAtLine(0, (uint8_t*) "assert failed");
-	sprintf(msg, "on line %lu", line);
-	BSP_LCD_DisplayStringAtLine(1, (uint8_t*) msg);
-	BSP_LCD_SetFont(&Font12);
-
-	uint16_t lineid = 3;
-	int32_t msglen = 0;
-	while (file[msglen] != '\0') {
-		msglen++;
-	}
-	int32_t msg_start = 0, i;
-	while (msglen > msg_start) {
-		int32_t part_size = min(LCD_MAX_CHARS_LINE, msglen - msg_start);
-		for (i = 0; i < part_size; ++i) {
-			msg[i] = file[msg_start + i];
-		}
-		msg[part_size] = '\0';
-		BSP_LCD_DisplayStringAtLine(lineid, (uint8_t*) msg);
-		msg_start += part_size;
-		lineid++;
-	}
-	Error_Handler();
+	assert_expr_failed(file, line);
   /* USER CODE END 6 */
 
 }
