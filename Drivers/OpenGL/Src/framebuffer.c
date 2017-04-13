@@ -12,7 +12,7 @@
 #include "debug_printf.h"
 #include "depth_sdram.h"
 
-#define FRAME_CLEAR_COLOR  LCD_COLOR_WHITE
+#define FRAME_CLEAR_COLOR  LCD_COLOR_LIGHTGRAY
 
 static void FrameBuffer_ProjectNdcPointToScreen(const FrameBuffer* frame, vec3 screen, vec4 ndc) {
 	screen[0] = (ndc[0] + 1) / 2.0 * frame->width;

@@ -27,6 +27,7 @@ void Cube_Init(Cube* cube, float size);
 
 void Cube_Scale(Cube* cube, float scale);
 void Cube_Translate(Cube* cube, float x, float y, float z);
+void Cube_TranslateVec3(Cube* cube, vec3 const v);
 void Cube_RotateWorld(Cube* cube, quat const q);
 void Cube_RotateLocal(Cube* cube, quat const q);
 

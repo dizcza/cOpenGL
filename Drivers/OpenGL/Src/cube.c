@@ -94,6 +94,10 @@ void Cube_Translate(Cube* cube, float x, float y, float z) {
 	mat4x4_translate_gl(cube->model, x, y, z);
 }
 
+void Cube_TranslateVec3(Cube* cube, vec3 const v) {
+	Cube_Translate(cube, v[0], v[1], v[2]);
+}
+
 // in 3D space
 void Cube_GetTriangle(const Cube* cube, trian4 trian, vec3uint32 colors, uint8_t tr_id) {
 	uint8_t index;
