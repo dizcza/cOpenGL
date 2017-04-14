@@ -68,6 +68,7 @@ static void inline LCD_Printf(const char *fmt, ...) {
 	va_start(lst, fmt);
 	vsprintf(buf, fmt, lst);
 	va_end(lst);
+	BSP_LCD_SetFont(&Font16);
 	BSP_LCD_DisplayStringAtLine(m_LcdLine, (uint8_t*) buf);
 	m_LcdLine = (m_LcdLine + 1) % 10;
 }

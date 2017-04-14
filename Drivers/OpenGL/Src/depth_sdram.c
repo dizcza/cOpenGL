@@ -8,6 +8,7 @@
 #include "main.h"
 #include "depth_sdram.h"
 #include "stm32f4xx_hal.h"
+#include "debug_printf.h"
 
 #define DMA_STREAM                 DMA2_Stream1
 #define DMA_CHANNEL                DMA_CHANNEL_1
@@ -23,9 +24,11 @@ static void TransferComplete(DMA_HandleTypeDef *DmaHandle);
 static void TransferError(DMA_HandleTypeDef *DmaHandle);
 static void TransferAbort(DMA_HandleTypeDef *DmaHandle);
 static uint32_t inline Depth_SDRAM_GetPixelAddress(uint16_t x, uint16_t y);
+static uint16_t inline GetLcdHeight();
 static HAL_DMA_StateTypeDef WaitReadyDma(const DMA_HandleTypeDef *DmaHandle, uint32_t timeout_ms);
 static void Depth_SDRAM_TestReadWrite();
 static void Depth_SDRAM_TestDmaWrite();
+static void Depth_SDRAM_TestDmaFinished();
 
 static SDRAM_HandleTypeDef* m_SdramHandle;
 static DMA_HandleTypeDef m_DmaHandle;
@@ -53,6 +56,10 @@ void Depth_SDRAM_Init(SDRAM_HandleTypeDef* sdramHandle, uint32_t startAddress,
 
 static uint32_t inline Depth_SDRAM_GetPixelAddress(uint16_t x, uint16_t y) {
 	return m_DeviceAddress + 4 * (y * m_LcdWidth + x);
+}
+
+static uint16_t inline GetLcdHeight() {
+	return m_LcdArea / m_LcdWidth;
 }
 
 void DMA2_Stream1_IRQHandler() {
@@ -116,6 +123,9 @@ static void TransferComplete(DMA_HandleTypeDef *DmaHandle)
 		Depth_SDRAM_ClearDepth();
 	} else {
 		m_DmaAlreadyClearedPixels = 0;
+#ifdef USE_ASSERT_EXPR
+		Depth_SDRAM_TestDmaFinished();
+#endif /* USE_ASSERT_EXPR */
 	}
 }
 
@@ -136,10 +146,14 @@ static void TransferAbort(DMA_HandleTypeDef *DmaHandle)
 }
 
 void Depth_SDRAM_WriteDepth(uint16_t x, uint16_t y, float depth) {
+	HAL_DMA_StateTypeDef dmaStatus = WaitReadyDma(&m_DmaHandle, DEPTH_DMA_WAIT_READY_MS);
+	assert_expr(dmaStatus == HAL_DMA_STATE_READY);
 	*(__IO float *)(Depth_SDRAM_GetPixelAddress(x, y)) = depth;
 }
 
 float Depth_SDRAM_ReadDepth(uint16_t x, uint16_t y) {
+	HAL_DMA_StateTypeDef dmaStatus = WaitReadyDma(&m_DmaHandle, DEPTH_DMA_WAIT_READY_MS);
+	assert_expr(dmaStatus == HAL_DMA_STATE_READY);
 	return *(__IO float *)(Depth_SDRAM_GetPixelAddress(x, y));
 }
 
@@ -159,7 +173,7 @@ void Depth_SDRAM_ClearDepth() {
 
 static void Depth_SDRAM_TestReadWrite() {
 	uint16_t x, y;
-	uint32_t m_lcd_height = m_LcdArea / m_LcdWidth;
+	uint16_t m_lcd_height = GetLcdHeight();
 	for (y = 0; y < m_lcd_height; ++y) {
 		for (x = 0; x < m_LcdWidth; ++x) {
 			float depth_ref = -1.0f * ((float) (m_LcdWidth - x)) / m_LcdWidth
@@ -173,21 +187,32 @@ static void Depth_SDRAM_TestReadWrite() {
 	}
 }
 
+static void Depth_SDRAM_TestDmaFinished() {
+	uint16_t x, y;
+	uint16_t m_lcd_height = GetLcdHeight();
+	for (y = 0; y < m_lcd_height; ++y) {
+		for (x = 0; x < m_LcdWidth; ++x) {
+			float depth = Depth_SDRAM_ReadDepth(x, y);
+			float delta = depth - m_depth_initial;
+			delta = delta > 0 ? delta : -delta;
+			if (delta > 1e-5) {
+				LCD_Printf("x=%d y=%d d=%f", x, y, depth);
+				BSP_LCD_DrawPixel(x, y, 0xFF000000);
+				BSP_LCD_DrawCircle(x, y, 10);
+				while(1);
+			}
+			assert_expr(delta < 1e-5);
+		}
+	}
+}
+
 static void Depth_SDRAM_TestDmaWrite() {
 	uint16_t x, y;
-	uint32_t m_lcd_height = m_LcdArea / m_LcdWidth;
+	uint16_t m_lcd_height = GetLcdHeight();
 	for (y = 0; y < m_lcd_height; ++y) {
 		for (x = 0; x < m_LcdWidth; ++x) {
 			Depth_SDRAM_WriteDepth(x, y, -2.f);
 		}
 	}
 	Depth_SDRAM_ClearDepth();
-	for (y = 0; y < m_lcd_height; ++y) {
-		for (x = 0; x < m_LcdWidth; ++x) {
-			float depth = Depth_SDRAM_ReadDepth(x, y);
-			float delta = depth - m_depth_initial;
-			delta = delta > 0 ? delta : -delta;
-			assert_expr(delta < 1e-5);
-		}
-	}
 }
