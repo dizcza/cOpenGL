@@ -1,2 +1,10 @@
+# binaries
 Debug/
+
+# Eclipse SystemWorkbench
+.cproject
+.settings/
+
+# CubeMX
+cOpenGL.ioc
 

@@ -60,8 +60,14 @@
 
 #define DEPTH_SDRAM_START_ADRRES (LCD_FRAME_BUFFER + 2 * BUFFER_OFFSET)
 
-/* Private variables ---------------------------------------------------------*/
 extern SDRAM_HandleTypeDef hsdram2;
+static __IO uint8_t m_DemoId = 0;
+
+cOpenGL_DemoTypedef cOpenGL_Examples[] = {
+	{CubeRotationAnim_Resume,  CubeRotationAnim_Pause},
+	{CubeTouchMe_Resume,       CubeTouchMe_Pause}
+};
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -70,14 +76,16 @@ void Error_Handler(void);
 
 /* USER CODE BEGIN PFP */
 /* Private function prototypes -----------------------------------------------*/
-
+void BSP_InitStuff();
 /* USER CODE END PFP */
 
 /* USER CODE BEGIN 0 */
 
 void BSP_InitStuff() {
 	/* Configure USER Button */
-	BSP_PB_Init(BUTTON_KEY, BUTTON_MODE_EXTI);
+	//fixme: do we need this?
+//	IO_StatusTypeDef io_ret = BSP_IO_Init();
+//	assert_expr(io_ret == IO_OK);
 
 	/* Initialize the LCD */
 	BSP_LCD_Init();
@@ -95,8 +103,8 @@ void BSP_InitStuff() {
 	BSP_LCD_SetBackColor(0xFF00FF00);
 	BSP_LCD_Clear(LCD_COLOR_WHITE);
 
-	TS_StatusTypeDef ret = BSP_TS_Init(BSP_LCD_GetXSize(), BSP_LCD_GetYSize());
-	assert_expr(ret == TS_OK);
+	TS_StatusTypeDef ts_ret = BSP_TS_Init(BSP_LCD_GetXSize(), BSP_LCD_GetYSize());
+	assert_expr(ts_ret == TS_OK);
 
 	if (IsCalibrationDone() == 0) {
 		Touchscreen_Calibration();
@@ -170,13 +178,20 @@ int main(void)
 	Depth_SDRAM_Init(&hsdram2, DEPTH_SDRAM_START_ADRRES, BSP_LCD_GetXSize(),
 			BSP_LCD_GetYSize());
 
-	CubeRotationAnim_DemoRun();
+	Camera camera;
+	Camera_Init(&camera);
 
+	FrameHandler_Init(BSP_LCD_GetXSize(), BSP_LCD_GetYSize());
+
+	CubeRotationAnim_Init(&camera);
+	CubeTouchMe_Init(&camera);
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
 	while (1) {
+		cOpenGL_Examples[m_DemoId].Resume();
+
   /* USER CODE END WHILE */
 
   /* USER CODE BEGIN 3 */
@@ -259,6 +274,18 @@ void SystemClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
+
+/**
+  * @brief  EXTI line 0 detection callbacks.
+  * @param  GPIO_Pin: Specifies the pins connected EXTI line
+  * @retval None
+  */
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
+	if (GPIO_Pin == KEY_BUTTON_PIN) {
+		cOpenGL_Examples[m_DemoId].Pause();
+		m_DemoId = (m_DemoId + 1) % (sizeof(cOpenGL_Examples) / sizeof(cOpenGL_Examples[0]));
+	}
+}
 
 #ifdef USE_ASSERT_EXPR
 /**

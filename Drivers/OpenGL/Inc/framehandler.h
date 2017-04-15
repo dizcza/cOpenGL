@@ -12,6 +12,7 @@
 #include "camera.h"
 
 void FrameHandler_Init(uint16_t width, uint16_t height);
+void FrameHandler_Reset();
 void FrameHandler_DrawCube(const Camera* camera, const Cube* cube);
 void FrameHandler_glFlush();
 

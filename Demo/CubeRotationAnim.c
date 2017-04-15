@@ -10,7 +10,6 @@
 #include <stdlib.h>
 
 #include "cube.h"
-#include "camera.h"
 #include "framehandler.h"
 #include "depth_sdram.h"
 #include "debug_printf.h"
@@ -19,6 +18,10 @@
 #define ROTANIM_CUBE_CNT    3
 
 static Cube m_Cubes[ROTANIM_CUBE_CNT];
+static const Camera* m_Camera;
+static const vec3 m_axis = {1, 1, 1};
+static uint32_t m_lastTick;
+static uint8_t m_isActive = 0;
 
 extern void Assert_Cube(const Cube* cube);
 
@@ -45,11 +48,8 @@ static void GetRandomRotation(quat rot) {
 	quat_rotate(rot, degrees_to_rads(degrees), axis);
 }
 
-void CubeRotationAnim_DemoRun() {
-	Camera camera;
-	Camera_Init(&camera);
-
-	FrameHandler_Init(BSP_LCD_GetXSize(), BSP_LCD_GetYSize());
+void CubeRotationAnim_Init(const Camera* camera) {
+	m_Camera = camera;
 
 	uint32_t i;
 	for (i = 0; i < ROTANIM_CUBE_CNT; ++i) {
@@ -63,25 +63,32 @@ void CubeRotationAnim_DemoRun() {
 
 		GetRandomTranslation(tr);
 		Cube_TranslateVec3(&m_Cubes[i], tr);
-
 	}
 
-	vec3 axis = {1, 1, 1};
+	m_lastTick = HAL_GetTick();
+}
+
+void CubeRotationAnim_Pause() {
+	m_isActive = 0;
+}
+
+void CubeRotationAnim_Resume() {
+	if (!m_isActive) {
+		FrameHandler_Reset();
+		m_isActive = 1;
+	}
+	uint32_t i;
 	quat q;
-	uint32_t last = HAL_GetTick();
-	while (1) {
-		uint32_t curr = HAL_GetTick();
-		uint32_t ms_passed = (curr - last) % ROTANIM_DURATION_MS;
-		float time_local = ((float)ms_passed) / ROTANIM_DURATION_MS;
-		float degrees = time_local * 180.f;
-		quat_rotate(q, degrees_to_rads(degrees), axis);
-		for (i = 0; i < ROTANIM_CUBE_CNT; ++i) {
-			Cube_RotateLocal(&m_Cubes[i], q);
-			Assert_Cube(&m_Cubes[i]);
-			FrameHandler_DrawCube(&camera, &m_Cubes[i]);
-		}
-		FrameHandler_glFlush();
-		last = curr;
+	uint32_t curr = HAL_GetTick();
+	uint32_t ms_passed = (curr - m_lastTick) % ROTANIM_DURATION_MS;
+	float time_local = ((float)ms_passed) / ROTANIM_DURATION_MS;
+	float degrees = time_local * 180.f;
+	quat_rotate(q, degrees_to_rads(degrees), m_axis);
+	for (i = 0; i < ROTANIM_CUBE_CNT; ++i) {
+		Cube_RotateLocal(&m_Cubes[i], q);
+		Assert_Cube(&m_Cubes[i]);
+		FrameHandler_DrawCube(m_Camera, &m_Cubes[i]);
 	}
-
+	FrameHandler_glFlush();
+	m_lastTick = curr;
 }

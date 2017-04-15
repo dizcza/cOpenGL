@@ -17,7 +17,21 @@ static uint32_t m_first_flush_timestamp = 0;
 static uint32_t m_flushes = 0;
 static char m_fps_info_str[10];
 
-static uint32_t inline FrameHandler_GetOtherFrameId() {
+static void FrameHandler_DisplayFPS();
+static uint32_t FrameHandler_GetOtherFrameId();
+
+static void FrameHandler_DisplayFPS() {
+	if (m_flushes == 0) {
+		m_first_flush_timestamp = HAL_GetTick();
+	} else {
+		float fps = 1000.f * m_flushes / (HAL_GetTick() - m_first_flush_timestamp);
+		sprintf(m_fps_info_str, "FPS %.2f", fps);
+		BSP_LCD_DisplayStringAtLine(0, (uint8_t*)m_fps_info_str);
+	}
+	m_flushes++;
+}
+
+static uint32_t FrameHandler_GetOtherFrameId() {
 	return (m_drawing_frame_id + 1) % FRAME_HANDLER_MAX_LAYERS;
 }
 
@@ -26,6 +40,14 @@ void FrameHandler_Init(uint16_t width, uint16_t height) {
 	for (frame_id = 0; frame_id < FRAME_HANDLER_MAX_LAYERS; ++frame_id) {
 		FrameBuffer_Init(&m_frames[frame_id], frame_id, width, height);
 	}
+}
+
+void FrameHandler_Reset() {
+	uint32_t frame_id;
+	for (frame_id = 0; frame_id < FRAME_HANDLER_MAX_LAYERS; ++frame_id) {
+		FrameBuffer_Clear(&m_frames[frame_id]);
+	}
+	m_flushes = 0;
 }
 
 void FrameHandler_DrawCube(const Camera* camera, const Cube* cube) {
@@ -38,12 +60,6 @@ void FrameHandler_glFlush() {
 	m_drawing_frame_id = FrameHandler_GetOtherFrameId();
 	BSP_LCD_SelectLayer(m_drawing_frame_id);
 	FrameBuffer_Clear(&m_frames[m_drawing_frame_id]);
-	if (m_flushes == 0) {
-		m_first_flush_timestamp = HAL_GetTick();
-	} else {
-		float fps = 1000.f * m_flushes / (HAL_GetTick() - m_first_flush_timestamp);
-		sprintf(m_fps_info_str, "FPS %.2f", fps);
-		BSP_LCD_DisplayStringAtLine(0, (uint8_t*)m_fps_info_str);
-	}
-	m_flushes++;
+	FrameHandler_DisplayFPS();
 }
+
