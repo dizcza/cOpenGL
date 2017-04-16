@@ -23,4 +23,7 @@ void CubeTouchMe_Init(const Camera* camera);
 void CubeTouchMe_Resume();
 void CubeTouchMe_Pause();
 
+void CubeGyro_Resume();
+void CubeGyro_Pause();
+
 #endif /* INC_DEMO_H_ */

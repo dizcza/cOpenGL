@@ -61,11 +61,12 @@
 #define DEPTH_SDRAM_START_ADRRES (LCD_FRAME_BUFFER + 2 * BUFFER_OFFSET)
 
 extern SDRAM_HandleTypeDef hsdram2;
-static __IO uint8_t m_DemoId = 1;
+static __IO uint8_t m_DemoId = 0;
 
 cOpenGL_DemoTypedef cOpenGL_Examples[] = {
 	{CubeRotationAnim_Resume,  CubeRotationAnim_Pause},
-	{CubeTouchMe_Resume,       CubeTouchMe_Pause}
+	{CubeTouchMe_Resume,       CubeTouchMe_Pause},
+	{CubeGyro_Resume,          CubeGyro_Pause}
 };
 
 /* USER CODE END PV */

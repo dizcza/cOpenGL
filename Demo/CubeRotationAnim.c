@@ -23,8 +23,6 @@ static const vec3 m_axis = {1, 1, 1};
 static uint32_t m_lastTick;
 static uint8_t m_isActive;
 
-extern void Assert_Cube(const Cube* cube);
-
 static inline float GetRandomFloat() {
 	return ((float)rand()) / RAND_MAX;
 }
