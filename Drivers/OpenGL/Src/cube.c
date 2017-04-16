@@ -78,10 +78,7 @@ void Cube_Init(Cube* cube, float size) {
 void Cube_RotateLocal(Cube* cube, quat const q) {
 	uint8_t i;
 	for (i = 0; i < CUBE_VERTEX_COUNT; ++i) {
-		vec3 r;
-		quat_mul_vec3(r, q, cube->vertices[i]);
-		vec3_dup(cube->vertices[i], r);
-		//quat_mul_vec3(cube->vertices[i], q, cube->vertices[i]);
+		quat_mul_vec3(cube->vertices[i], q, cube->vertices[i]);
 	}
 }
 

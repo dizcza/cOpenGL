@@ -114,7 +114,7 @@ int main(void)
 
   /* USER CODE BEGIN 1 */
 
-#ifdef DEBUG
+#ifdef DEBUG_CONSOLE
 	initialise_monitor_handles();
 #endif
 
@@ -156,6 +156,7 @@ int main(void)
   /* USER CODE BEGIN WHILE */
 	while (1) {
 		cOpenGL_Examples[m_DemoId].Resume();
+
 
   /* USER CODE END WHILE */
 
@@ -262,7 +263,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
    */
 void assert_expr_failed(const uint8_t* file, uint32_t line)
 {
-	db_printf("Wrong parameters value: file %s on line %d\r\n", file, line);
+	db_printf("Wrong parameters value: file %s on line %lu\r\n", file, line);
 	char msg[LCD_MAX_CHARS_LINE + 1];
 	BSP_LCD_SetLayerVisible(1, ENABLE);
 	BSP_LCD_SelectLayer(1);
@@ -282,7 +283,7 @@ void assert_expr_failed(const uint8_t* file, uint32_t line)
 	}
 	int32_t msg_start = 0, i;
 	while (msglen > msg_start) {
-		int32_t part_size = min(LCD_MAX_CHARS_LINE, msglen - msg_start);
+		int32_t part_size = LINMATH_MIN(LCD_MAX_CHARS_LINE, msglen - msg_start);
 		for (i = 0; i < part_size; ++i) {
 			msg[i] = file[msg_start + i];
 		}

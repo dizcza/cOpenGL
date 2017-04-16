@@ -52,8 +52,8 @@ void FrameBuffer_FillTrian(FrameBuffer* frame, trian3 const trian_xyz, vec3uint3
 	vec2int16 bmax;
 	vec3 baryc;
 	trian2_bbox_int16(bmin, bmax, trian_xy);
-	for (y = max(bmin[1], 0); y < min(bmax[1], frame->height); ++y) {
-		for (x = max(bmin[0], 0); x < min(bmax[0], frame->width); ++x) {
+	for (y = LINMATH_MAX(bmin[1], 0); y < LINMATH_MIN(bmax[1], frame->height); ++y) {
+		for (x = LINMATH_MAX(bmin[0], 0); x < LINMATH_MIN(bmax[0], frame->width); ++x) {
 			vec2 p = {x, y};
 			trian2_barycentric(baryc, trian_xy, p);
 			if (vec3_all_pos(baryc)) {

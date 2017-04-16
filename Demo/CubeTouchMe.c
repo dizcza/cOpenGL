@@ -55,7 +55,7 @@ static TS_ActionTypeDef onTouchMove(vec2 curr, vec2 prev) {
 		float vMovePx = vec3_len(vMove);
 //		LCD_Printf("%.1f, %.1f, %.1f", vMove[0], vMove[1], vMove[2]);
 		quat q;
-		float rads = degrees_to_rads(360.f * vMovePx / TOUCH_FULL_ROTATION_PX);
+		float rads = LINMATH_DEGREES_TO_RADS(360.f * vMovePx / TOUCH_FULL_ROTATION_PX);
 		quat_rotate(q, rads, vMove);
 		Cube_RotateLocal(&m_Cube, q);
 		action = TS_MOVE;
@@ -74,7 +74,7 @@ void CubeTouchMe_Init(const Camera* camera) {
 
 	vec3 axis = {1, 1, 1};
 	quat q;
-	quat_rotate(q, degrees_to_rads(30), axis);
+	quat_rotate(q, LINMATH_DEGREES_TO_RADS(30), axis);
 	Cube_RotateLocal(&m_Cube, q);
 }
 
