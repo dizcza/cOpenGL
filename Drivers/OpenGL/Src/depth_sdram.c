@@ -31,7 +31,7 @@ static void Depth_SDRAM_TestDmaWrite();
 static void Depth_SDRAM_TestDmaFinished();
 
 static SDRAM_HandleTypeDef* m_SdramHandle;
-static DMA_HandleTypeDef m_DmaHandle;
+DMA_HandleTypeDef Depth_DmaHandle;
 
 static uint16_t m_LcdWidth;
 static uint32_t m_LcdArea;
@@ -63,7 +63,7 @@ static uint16_t inline GetLcdHeight() {
 }
 
 void DMA2_Stream1_IRQHandler() {
-	HAL_DMA_IRQHandler(&m_DmaHandle);
+	HAL_DMA_IRQHandler(&Depth_DmaHandle);
 }
 
 static HAL_DMA_StateTypeDef WaitReadyDma(const DMA_HandleTypeDef *DmaHandle, uint32_t timeout_ms) {
@@ -80,30 +80,30 @@ static void DMA_Config(void)
   __HAL_RCC_DMA2_CLK_ENABLE();
 
   /*##-2- Select the DMA functional Parameters ###############################*/
-  m_DmaHandle.Init.Channel = DMA_CHANNEL;                     /* DMA_CHANNEL_1                    */
-  m_DmaHandle.Init.Direction = DMA_MEMORY_TO_MEMORY;          /* M2M transfer mode                */
-  m_DmaHandle.Init.PeriphInc = DMA_PINC_DISABLE;              /* Peripheral increment mode Disable */
-  m_DmaHandle.Init.MemInc = DMA_MINC_ENABLE;                  /* Memory increment mode Enable     */
-  m_DmaHandle.Init.PeriphDataAlignment = DMA_PDATAALIGN_WORD; /* Peripheral data alignment : Word */
-  m_DmaHandle.Init.MemDataAlignment = DMA_MDATAALIGN_WORD;    /* memory data alignment : Word     */
-  m_DmaHandle.Init.Mode = DMA_NORMAL;                         /* Normal DMA mode                  */
-  m_DmaHandle.Init.Priority = DMA_PRIORITY_HIGH;              /* priority level : high            */
-  m_DmaHandle.Init.FIFOMode = DMA_FIFOMODE_DISABLE;           /* FIFO mode disabled               */
-  m_DmaHandle.Init.FIFOThreshold = DMA_FIFO_THRESHOLD_FULL;
-  m_DmaHandle.Init.MemBurst = DMA_MBURST_SINGLE;              /* Memory burst                     */
-  m_DmaHandle.Init.PeriphBurst = DMA_PBURST_SINGLE;           /* Peripheral burst                 */
+  Depth_DmaHandle.Init.Channel = DMA_CHANNEL;                     /* DMA_CHANNEL_1                    */
+  Depth_DmaHandle.Init.Direction = DMA_MEMORY_TO_MEMORY;          /* M2M transfer mode                */
+  Depth_DmaHandle.Init.PeriphInc = DMA_PINC_DISABLE;              /* Peripheral increment mode Disable */
+  Depth_DmaHandle.Init.MemInc = DMA_MINC_ENABLE;                  /* Memory increment mode Enable     */
+  Depth_DmaHandle.Init.PeriphDataAlignment = DMA_PDATAALIGN_WORD; /* Peripheral data alignment : Word */
+  Depth_DmaHandle.Init.MemDataAlignment = DMA_MDATAALIGN_WORD;    /* memory data alignment : Word     */
+  Depth_DmaHandle.Init.Mode = DMA_NORMAL;                         /* Normal DMA mode                  */
+  Depth_DmaHandle.Init.Priority = DMA_PRIORITY_HIGH;              /* priority level : high            */
+  Depth_DmaHandle.Init.FIFOMode = DMA_FIFOMODE_DISABLE;           /* FIFO mode disabled               */
+  Depth_DmaHandle.Init.FIFOThreshold = DMA_FIFO_THRESHOLD_FULL;
+  Depth_DmaHandle.Init.MemBurst = DMA_MBURST_SINGLE;              /* Memory burst                     */
+  Depth_DmaHandle.Init.PeriphBurst = DMA_PBURST_SINGLE;           /* Peripheral burst                 */
 
   /*##-3- Select the DMA instance to be used for the transfer : DMA2_Stream1 #*/
-  m_DmaHandle.Instance = DMA_STREAM;
+  Depth_DmaHandle.Instance = DMA_STREAM;
 
   /*##-4- Initialize the DMA stream ##########################################*/
-  HAL_StatusTypeDef dmaInitStatus = HAL_DMA_Init(&m_DmaHandle);
+  HAL_StatusTypeDef dmaInitStatus = HAL_DMA_Init(&Depth_DmaHandle);
   assert_expr(dmaInitStatus == HAL_OK);
 
   /*##-5- Select Callbacks functions called after Transfer complete and Transfer error */
-  HAL_DMA_RegisterCallback(&m_DmaHandle, HAL_DMA_XFER_CPLT_CB_ID, TransferComplete);
-  HAL_DMA_RegisterCallback(&m_DmaHandle, HAL_DMA_XFER_ERROR_CB_ID, TransferError);
-  HAL_DMA_RegisterCallback(&m_DmaHandle, HAL_DMA_XFER_ABORT_CB_ID, TransferAbort);
+  HAL_DMA_RegisterCallback(&Depth_DmaHandle, HAL_DMA_XFER_CPLT_CB_ID, TransferComplete);
+  HAL_DMA_RegisterCallback(&Depth_DmaHandle, HAL_DMA_XFER_ERROR_CB_ID, TransferError);
+  HAL_DMA_RegisterCallback(&Depth_DmaHandle, HAL_DMA_XFER_ABORT_CB_ID, TransferAbort);
 
   /*##-6- Configure NVIC for DMA transfer complete/error interrupts ##########*/
   HAL_NVIC_SetPriority(DMA_STREAM_IRQ, 0, 0);
@@ -146,25 +146,25 @@ static void TransferAbort(DMA_HandleTypeDef *DmaHandle)
 }
 
 void Depth_SDRAM_WriteDepth(uint16_t x, uint16_t y, float depth) {
-	HAL_DMA_StateTypeDef dmaStatus = WaitReadyDma(&m_DmaHandle, DEPTH_DMA_WAIT_READY_MS);
+	HAL_DMA_StateTypeDef dmaStatus = WaitReadyDma(&Depth_DmaHandle, DEPTH_DMA_WAIT_READY_MS);
 	assert_expr(dmaStatus == HAL_DMA_STATE_READY);
 	*(__IO float *)(Depth_SDRAM_GetPixelAddress(x, y)) = depth;
 }
 
 float Depth_SDRAM_ReadDepth(uint16_t x, uint16_t y) {
-	HAL_DMA_StateTypeDef dmaStatus = WaitReadyDma(&m_DmaHandle, DEPTH_DMA_WAIT_READY_MS);
+	HAL_DMA_StateTypeDef dmaStatus = WaitReadyDma(&Depth_DmaHandle, DEPTH_DMA_WAIT_READY_MS);
 	assert_expr(dmaStatus == HAL_DMA_STATE_READY);
 	return *(__IO float *)(Depth_SDRAM_GetPixelAddress(x, y));
 }
 
 void Depth_SDRAM_ClearDepth() {
-	HAL_DMA_StateTypeDef dmaStatus = WaitReadyDma(&m_DmaHandle, DEPTH_DMA_WAIT_READY_MS);
+	HAL_DMA_StateTypeDef dmaStatus = WaitReadyDma(&Depth_DmaHandle, DEPTH_DMA_WAIT_READY_MS);
 	assert_expr(dmaStatus == HAL_DMA_STATE_READY);
 	m_DmaLastPixChunkSize = m_LcdArea - m_DmaAlreadyClearedPixels;
 	if (m_DmaLastPixChunkSize > DEPTH_DMA_FLOAT_BUFFER_MAX_SIZE) {
 		m_DmaLastPixChunkSize = DEPTH_DMA_FLOAT_BUFFER_MAX_SIZE;
 	}
-	HAL_StatusTypeDef status = HAL_DMA_Start_IT(&m_DmaHandle,
+	HAL_StatusTypeDef status = HAL_DMA_Start_IT(&Depth_DmaHandle,
 								  (uint32_t)&(m_depth_initial),
 								  (uint32_t)(m_DeviceAddress + 4 * m_DmaAlreadyClearedPixels),
 								  m_DmaLastPixChunkSize);

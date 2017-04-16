@@ -21,7 +21,7 @@ static Cube m_Cubes[ROTANIM_CUBE_CNT];
 static const Camera* m_Camera;
 static const vec3 m_axis = {1, 1, 1};
 static uint32_t m_lastTick;
-static uint8_t m_isActive = 0;
+static uint8_t m_isActive;
 
 extern void Assert_Cube(const Cube* cube);
 
@@ -50,6 +50,7 @@ static void GetRandomRotation(quat rot) {
 
 void CubeRotationAnim_Init(const Camera* camera) {
 	m_Camera = camera;
+	m_isActive = 0;
 
 	uint32_t i;
 	for (i = 0; i < ROTANIM_CUBE_CNT; ++i) {
@@ -59,8 +60,8 @@ void CubeRotationAnim_Init(const Camera* camera) {
 		quat rot;
 		GetRandomRotation(rot);
 		Cube_RotateLocal(&m_Cubes[i], rot);
-		vec3 tr;
 
+		vec3 tr;
 		GetRandomTranslation(tr);
 		Cube_TranslateVec3(&m_Cubes[i], tr);
 	}
@@ -86,7 +87,6 @@ void CubeRotationAnim_Resume() {
 	quat_rotate(q, degrees_to_rads(degrees), m_axis);
 	for (i = 0; i < ROTANIM_CUBE_CNT; ++i) {
 		Cube_RotateLocal(&m_Cubes[i], q);
-		Assert_Cube(&m_Cubes[i]);
 		FrameHandler_DrawCube(m_Camera, &m_Cubes[i]);
 	}
 	FrameHandler_glFlush();

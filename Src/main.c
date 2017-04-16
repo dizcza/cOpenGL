@@ -61,7 +61,7 @@
 #define DEPTH_SDRAM_START_ADRRES (LCD_FRAME_BUFFER + 2 * BUFFER_OFFSET)
 
 extern SDRAM_HandleTypeDef hsdram2;
-static __IO uint8_t m_DemoId = 0;
+static __IO uint8_t m_DemoId = 1;
 
 cOpenGL_DemoTypedef cOpenGL_Examples[] = {
 	{CubeRotationAnim_Resume,  CubeRotationAnim_Pause},
@@ -82,11 +82,6 @@ void BSP_InitStuff();
 /* USER CODE BEGIN 0 */
 
 void BSP_InitStuff() {
-	/* Configure USER Button */
-	//fixme: do we need this?
-//	IO_StatusTypeDef io_ret = BSP_IO_Init();
-//	assert_expr(io_ret == IO_OK);
-
 	/* Initialize the LCD */
 	BSP_LCD_Init();
 
@@ -109,37 +104,6 @@ void BSP_InitStuff() {
 	if (IsCalibrationDone() == 0) {
 		Touchscreen_Calibration();
 	}
-}
-
-void Cube_TouchMe() {
-	uint8_t status;
-	BSP_LCD_DrawRect(10, 10, 10, 10);
-	while (1) {
-		status = BSP_TS_ITGetStatus();
-		db_printf("status %d\n", status);
-		BSP_TS_ITClear();
-		if (status) {
-			BSP_LCD_DrawRect(100, 100, 40, 40);
-			db_printf("GOT!\n");
-		}
-	}
-	while (1) {
-		TS_StateTypeDef ts_state;
-		BSP_TS_GetState(&ts_state);
-		BSP_LCD_Clear(LCD_COLOR_WHITE);
-		if (ts_state.TouchDetected) {
-			uint16_t x = Calibration_GetX(ts_state.X);
-			uint16_t y = Calibration_GetY(ts_state.Y);
-			db_printf("x=%d y=%d ; ", x, y);db_printf("xts=%d yts=%d\n", ts_state.X, ts_state.Y);
-			char str[20];
-			sprintf(str, "X=%d,Y=%d\n", ts_state.X, ts_state.Y);
-			BSP_LCD_DisplayStringAtLine(0, (uint8_t*) str);
-			sprintf(str, "X=%d,Y=%d\n", x, y);
-			BSP_LCD_DisplayStringAtLine(1, (uint8_t*) str);
-			//HAL_Delay(300);
-		}
-	}
-
 }
 
 /* USER CODE END 0 */
@@ -299,6 +263,9 @@ void assert_expr_failed(const uint8_t* file, uint32_t line)
 {
 	db_printf("Wrong parameters value: file %s on line %d\r\n", file, line);
 	char msg[LCD_MAX_CHARS_LINE + 1];
+	BSP_LCD_SetLayerVisible(1, ENABLE);
+	BSP_LCD_SelectLayer(1);
+	BSP_LCD_Clear(LCD_COLOR_WHITE);
 	BSP_LCD_SetBackColor(LCD_COLOR_WHITE);
 	BSP_LCD_SetTextColor(LCD_COLOR_RED);
 	BSP_LCD_SetFont(&Font16);

@@ -7,9 +7,12 @@
 
 #define FRAME_HANDLER_MAX_LAYERS 2
 
+#include "main.h"
 #include "stm32f429i_discovery_lcd.h"
 #include "framehandler.h"
 #include "framebuffer.h"
+
+void Assert_Cube(const Cube* cube);
 
 static FrameBuffer m_frames[FRAME_HANDLER_MAX_LAYERS];
 static uint32_t m_drawing_frame_id = 1;
@@ -51,6 +54,9 @@ void FrameHandler_Reset() {
 }
 
 void FrameHandler_DrawCube(const Camera* camera, const Cube* cube) {
+#ifdef USE_ASSERT_EXPR
+	Assert_Cube(cube);
+#endif /* USE_ASSERT_EXPR */
 	FrameBuffer_DrawCube(&m_frames[m_drawing_frame_id], camera, cube);
 }
 

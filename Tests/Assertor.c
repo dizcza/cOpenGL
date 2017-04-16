@@ -8,7 +8,7 @@
 #include "main.h"
 #include "math.h"
 #include "cube.h"
-#include "stm32f4xx_hal.h"
+#include "debug_printf.h"
 
 #define ASSERT_EPS ((float) 1e-4)
 
@@ -45,7 +45,6 @@ void Assert_Trian454590(trian4 const trian) {
 }
 
 void Assert_Cube(const Cube* cube) {
-#ifdef USE_ASSERT_EXPR
 	vec3uint32 colors;
 	trian4 trian;
 	uint8_t i;
@@ -53,5 +52,4 @@ void Assert_Cube(const Cube* cube) {
 		Cube_GetTriangle(cube, trian, colors, i);
 		Assert_Trian454590(trian);
 	}
-#endif /* USE_ASSERT_EXPR */
 }
