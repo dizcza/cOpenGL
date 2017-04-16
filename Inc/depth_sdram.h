@@ -10,7 +10,7 @@
 
 #include "stm32f429i_discovery_sdram.h"
 
-void  Depth_SDRAM_Init(SDRAM_HandleTypeDef*, uint32_t startAdrres, uint16_t lcd_width, uint16_t lcd_height);
+void  Depth_SDRAM_Init(SDRAM_HandleTypeDef* sdramHandle, uint32_t startAdrres, uint16_t lcd_width, uint16_t lcd_height);
 void  Depth_SDRAM_WriteDepth(uint16_t x, uint16_t y, float depth);
 float Depth_SDRAM_ReadDepth(uint16_t x, uint16_t y);
 void  Depth_SDRAM_ClearDepth();
