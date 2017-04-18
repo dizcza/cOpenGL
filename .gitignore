@@ -1,5 +1,6 @@
 # binaries
-Debug/
+Debug/*
+!Debug/makefile
 
 # Eclipse SystemWorkbench
 .cproject
