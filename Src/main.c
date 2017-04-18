@@ -66,7 +66,6 @@ static __IO uint8_t m_DemoId = 0;
 cOpenGL_DemoTypedef cOpenGL_Examples[] = {
 	{CubeRotationAnim_Resume,  CubeRotationAnim_Pause},
 	{CubeTouchMe_Resume,       CubeTouchMe_Pause},
-	{CubeGyro_Resume,          CubeGyro_Pause}
 };
 
 /* USER CODE END PV */

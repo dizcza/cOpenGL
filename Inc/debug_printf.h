@@ -8,7 +8,7 @@
 #ifndef DEBUG_PRINTF_H_
 #define DEBUG_PRINTF_H_
 
-#define DEBUG_CONSOLE1
+//#define DEBUG_CONSOLE
  #ifdef DEBUG_CONSOLE
 	 #include "linmath.h"
      #include <stdio.h>
@@ -43,7 +43,7 @@ static inline void db_printf_mat##n##x##n(mat##n##x##n const M) { \
      #define db_puts(s)
      #define db_printf(szFormat, ...)
  #define DB_DEFINE_PRINTF(n)
- #endif
+ #endif /* DEBUG_CONSOLE */
 
 DB_DEFINE_PRINTF(3);
 DB_DEFINE_PRINTF(4);
