@@ -10,9 +10,11 @@ This is C89 implementation of OpenGL basics for STM32F429 Discovery boards.
 
 * Does not require any additional libraries.
 * Written in ANSI C89.
-* Uses depth buffer to solve the visibility problem (hidden 3D objects are not drawn).
-* Can draw _any_ object as long as its mesh (polygons) is provided (vertices positions and colors are required).
-* Fast framebuffer (both color and depth) clearing with DMA technique. (This is done after each redraw of the 3D scene)
+* Uses [depth buffer](https://en.wikipedia.org/wiki/Z-buffering) to solve the visibility problem (hidden 3D objects are not drawn).
+* Can draw _any_ object as long as its [polygon mesh](https://en.wikipedia.org/wiki/Polygon_mesh) is provided (vertices positions and colors are required).
+* Fast framebuffer clear (both color and depth) with DMA technique. (This is done after each redraw of the 3D scene)
+* [Barycentric coordinates](https://www.scratchapixel.com/lessons/3d-basic-rendering/ray-tracing-rendering-a-triangle/barycentric-coordinates) for smooth color interpolation between vertices.
+* Test coverage of OpenGL modules.
 
 ### Not implemented features
 

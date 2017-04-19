@@ -8,11 +8,9 @@
 #include "main.h"
 #include "stdint.h"
 #include "depth_sdram.h"
-#include "stm32f4xx_hal.h"
 #include "debug_printf.h"
 
 #define DMA_BUFFER_MAX_SZ          0xFFFF
-#define DEPTH_DMA_WAIT_READY_MS    10
 
 /* Private function prototypes -----------------------------------------------*/
 static void DMA_ConfigWrite(void);
@@ -21,7 +19,6 @@ static void WriteTransferError(DMA_HandleTypeDef *DmaHandle);
 static void WriteTransferAbort(DMA_HandleTypeDef *DmaHandle);
 static uint32_t inline Depth_SDRAM_GetPixelAddress(uint16_t x, uint16_t y);
 static uint16_t inline GetLcdHeight();
-static HAL_DMA_StateTypeDef WaitReadyDma(const DMA_HandleTypeDef *DmaHandle, uint32_t timeout_ms);
 static void Depth_SDRAM_TestReadWrite();
 static void Depth_SDRAM_TestDmaWrite();
 static void Depth_SDRAM_TestDmaFinished();
@@ -66,12 +63,12 @@ void DMA2_Stream1_IRQHandler() {
 	HAL_DMA_IRQHandler(&Depth_DmaHandleWrite);
 }
 
-static HAL_DMA_StateTypeDef WaitReadyDma(const DMA_HandleTypeDef *DmaHandle, uint32_t timeout_ms) {
+HAL_DMA_StateTypeDef Depth_WaitReadyDma(uint32_t timeout_ms) {
 	const uint32_t start = HAL_GetTick();
-	while (DmaHandle->State != HAL_DMA_STATE_READY && (HAL_GetTick() - start < timeout_ms)) {
+	while (Depth_DmaHandleWrite.State != HAL_DMA_STATE_READY && (HAL_GetTick() - start < timeout_ms)) {
 		// just wait
 	}
-	return DmaHandle->State;
+	return Depth_DmaHandleWrite.State;
 }
 
 static void DMA_ConfigWrite(void)
@@ -136,8 +133,6 @@ static void WriteTransferAbort(DMA_HandleTypeDef *DmaHandle)
 
 
 void Depth_SDRAM_WriteDepth(uint16_t x, uint16_t y, float depth) {
-	HAL_DMA_StateTypeDef dmaStatus = WaitReadyDma(&Depth_DmaHandleWrite, DEPTH_DMA_WAIT_READY_MS);
-	assert_expr(dmaStatus == HAL_DMA_STATE_READY);
 	*(__IO float *)(Depth_SDRAM_GetPixelAddress(x, y)) = depth;
 }
 
@@ -146,7 +141,7 @@ float Depth_SDRAM_ReadDepth(uint16_t x, uint16_t y) {
 }
 
 void Depth_SDRAM_ClearDepth() {
-	HAL_DMA_StateTypeDef dmaStatus = WaitReadyDma(&Depth_DmaHandleWrite, DEPTH_DMA_WAIT_READY_MS);
+	HAL_DMA_StateTypeDef dmaStatus = Depth_WaitReadyDma(DEPTH_DMA_WAIT_READY_MS);
 	assert_expr(dmaStatus == HAL_DMA_STATE_READY);
 	m_DmaLastPixChunkSize = m_LcdArea - m_DmaAlreadyClearedPixels;
 	if (m_DmaLastPixChunkSize > m_DmaBufferWriteSz) {
