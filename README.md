@@ -25,7 +25,7 @@ This is C89 implementation of OpenGL basics for STM32F429 Discovery boards.
 
 ### Demo (YouTube)
 
-[![Demo YouTube](http://i63.tinypic.com/2v8iv4g.jpg)](https://youtu.be/da3nk9iFHSY)
+[![Demo YouTube](http://i63.tinypic.com/2v8iv4g.jpg)](https://youtu.be/djybFXNTcbc)
 
 ### Used libraries
 
