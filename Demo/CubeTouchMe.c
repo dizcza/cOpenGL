@@ -11,7 +11,6 @@
 #include "linmath.h"
 #include "stm32f429i_discovery_lcd.h"
 #include "stm32f429i_discovery_ts.h"
-#include "debug_printf.h"
 
 #define TOUCH_MAX_OFFSET_X       50
 #define TOUCH_MAX_OFFSET_Y       50
@@ -57,7 +56,7 @@ static TS_ActionTypeDef onTouchMove(vec2 curr, vec2 prev) {
 		quat q;
 		float rads = LINMATH_DEGREES_TO_RADS(360.f * vMovePx / TOUCH_FULL_ROTATION_PX);
 		quat_rotate(q, rads, vMove);
-		Cube_RotateLocal(&m_Cube, q);
+		OpenGL_Cube_RotateLocal(&m_Cube, q);
 		action = TS_MOVE;
 	}
 	vec2_dup(prev, curr);
@@ -70,12 +69,12 @@ void CubeTouchMe_Init(const Camera* camera) {
 	m_LastTouch[0] = 0;
 	m_LastTouch[1] = 0;
 
-	Cube_Init(&m_Cube, 0.7f);
+	OpenGL_Cube_Init(&m_Cube, 0.7f);
 
 	vec3 axis = {1, 1, 1};
 	quat q;
 	quat_rotate(q, LINMATH_DEGREES_TO_RADS(30), axis);
-	Cube_RotateLocal(&m_Cube, q);
+	OpenGL_Cube_RotateLocal(&m_Cube, q);
 }
 
 void CubeTouchMe_Pause() {

@@ -5,14 +5,13 @@
  *      Author: dizcza
  */
 
-#include <Demo.h>
-#include "stm32f429i_discovery_lcd.h"
 #include <stdlib.h>
+#include "stm32f429i_discovery_lcd.h"
 
-#include "cube.h"
+#include "oglcube.h"
 #include "framehandler.h"
 #include "depth_sdram.h"
-#include "debug_printf.h"
+#include "Demo.h"
 
 #define ROTANIM_DURATION_MS 3000
 #define ROTANIM_CUBE_CNT    3
@@ -53,15 +52,15 @@ void CubeRotationAnim_Init(const Camera* camera) {
 	uint32_t i;
 	for (i = 0; i < ROTANIM_CUBE_CNT; ++i) {
 		float scale = GetRandomFloatRange(0.1f, 0.8f);
-		Cube_Init(&m_Cubes[i], scale);
+		OpenGL_Cube_Init(&m_Cubes[i], scale);
 
 		quat rot;
 		GetRandomRotation(rot);
-		Cube_RotateLocal(&m_Cubes[i], rot);
+		OpenGL_Cube_RotateLocal(&m_Cubes[i], rot);
 
 		vec3 tr;
 		GetRandomTranslation(tr);
-		Cube_TranslateVec3(&m_Cubes[i], tr);
+		OpenGL_Cube_TranslateVec3(&m_Cubes[i], tr);
 	}
 
 	m_lastTick = HAL_GetTick();
@@ -84,7 +83,7 @@ void CubeRotationAnim_Resume() {
 	float degrees = time_local * 180.f;
 	quat_rotate(q, LINMATH_DEGREES_TO_RADS(degrees), m_axis);
 	for (i = 0; i < ROTANIM_CUBE_CNT; ++i) {
-		Cube_RotateLocal(&m_Cubes[i], q);
+		OpenGL_Cube_RotateLocal(&m_Cubes[i], q);
 		FrameHandler_DrawCube(m_Camera, &m_Cubes[i]);
 	}
 	FrameHandler_glFlush();

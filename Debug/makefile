@@ -8,23 +8,26 @@ RM := rm -rf
 
 # All of the sources participating in the build are defined here
 -include sources.mk
--include startup/subdir.mk
--include Tests/subdir.mk
+-include Startup/subdir.mk
 -include Src/subdir.mk
--include Drivers/linmath.h/subdir.mk
--include Drivers/STM32F4xx_HAL_Driver_Additional/Src/subdir.mk
+-include Modules/linmath.h/subdir.mk
+-include Modules/OpenGL/Src/subdir.mk
+-include Modules/LCD/TouchScreen/subdir.mk
+-include Modules/LCD/Log/subdir.mk
+-include Modules/LCD/Fonts/subdir.mk
+-include Modules/BSP/Components/stmpe811/subdir.mk
+-include Modules/BSP/Components/ili9341/subdir.mk
+-include Modules/BSP/subdir.mk
+-include Modules/subdir.mk
 -include Drivers/STM32F4xx_HAL_Driver/Src/subdir.mk
--include Drivers/OpenGL/Src/subdir.mk
--include Drivers/Fonts/subdir.mk
--include Drivers/Components/stmpe811/subdir.mk
--include Drivers/Components/l3gd20/subdir.mk
--include Drivers/Components/ili9341/subdir.mk
--include Drivers/BSP/subdir.mk
 -include Demo/subdir.mk
 -include subdir.mk
 -include objects.mk
 
 ifneq ($(MAKECMDGOALS),clean)
+ifneq ($(strip $(S_DEPS)),)
+-include $(S_DEPS)
+endif
 ifneq ($(strip $(S_UPPER_DEPS)),)
 -include $(S_UPPER_DEPS)
 endif
@@ -36,31 +39,51 @@ endif
 -include ../makefile.defs
 
 # Add inputs and outputs from these tool invocations to the build variables 
+EXECUTABLES += \
+cOpenGL.elf \
+
+SIZE_OUTPUT += \
+default.size.stdout \
+
+OBJDUMP_LIST += \
+cOpenGL.list \
+
+OBJCOPY_BIN += \
+cOpenGL.bin \
+
 
 # All Target
-all: cOpenGL.elf
+all: cOpenGL.elf secondary-outputs
 
 # Tool invocations
-cOpenGL.elf: $(OBJS) $(USER_OBJS)
-	@echo 'Building target: $@'
-	@echo 'Invoking: MCU GCC Linker'
-	arm-none-eabi-gcc -mcpu=cortex-m4 -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16 -specs=nosys.specs -u _printf_float -specs=nano.specs -specs=rdimon.specs -lc -lrdimon -T"../STM32F429ZITx_FLASH.ld" -Wl,-Map=output.map -Wl,--gc-sections -lm -o "cOpenGL.elf" @"objects.list" $(USER_OBJS) $(LIBS)
+cOpenGL.elf: $(OBJS) $(USER_OBJS) /home/dizcza/microcontrollers/workspace_1.4.0/cOpenGL/STM32F429ZITX_FLASH.ld
+	arm-none-eabi-gcc -o "cOpenGL.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"/home/dizcza/microcontrollers/workspace_1.4.0/cOpenGL/STM32F429ZITX_FLASH.ld" --specs=nosys.specs -Wl,-Map="cOpenGL.map" -Wl,--gc-sections -static -u _printf_float --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
-	$(MAKE) --no-print-directory post-build
+
+default.size.stdout: $(EXECUTABLES)
+	arm-none-eabi-size  $(EXECUTABLES)
+	@echo 'Finished building: $@'
+	@echo ' '
+
+cOpenGL.list: $(EXECUTABLES)
+	arm-none-eabi-objdump -h -S $(EXECUTABLES) > "cOpenGL.list"
+	@echo 'Finished building: $@'
+	@echo ' '
+
+cOpenGL.bin: $(EXECUTABLES)
+	arm-none-eabi-objcopy  -O binary $(EXECUTABLES) "cOpenGL.bin"
+	@echo 'Finished building: $@'
+	@echo ' '
 
 # Other Targets
 clean:
 	-$(RM) *
 	-@echo ' '
 
-post-build:
-	-@echo 'Generating binary and Printing size information:'
-	arm-none-eabi-objcopy -O binary "cOpenGL.elf" "cOpenGL.bin"
-	arm-none-eabi-size "cOpenGL.elf"
-	-@echo ' '
+secondary-outputs: $(SIZE_OUTPUT) $(OBJDUMP_LIST) $(OBJCOPY_BIN)
 
 .PHONY: all clean dependents
-.SECONDARY: post-build
+.SECONDARY:
 
 -include ../makefile.targets

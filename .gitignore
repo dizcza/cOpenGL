@@ -1,11 +1,3 @@
-# binaries
-Debug/*
-!Debug/makefile
-
-# Eclipse SystemWorkbench
-.cproject
+Debug/
 .settings/
-
-# CubeMX
-cOpenGL.ioc
-
+*.launch

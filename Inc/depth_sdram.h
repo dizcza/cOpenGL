@@ -11,6 +11,8 @@
 #include "stm32f429i_discovery_sdram.h"
 #include "stm32f4xx_hal.h"
 
+#include "opengl.h"
+
 #define DEPTH_DMA_WAIT_READY_MS    10
 
 

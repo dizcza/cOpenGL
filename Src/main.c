@@ -1,65 +1,70 @@
+/* USER CODE BEGIN Header */
 /**
   ******************************************************************************
-  * File Name          : main.c
-  * Description        : Main program body
+  * @file           : main.c
+  * @brief          : Main program body
   ******************************************************************************
+  * @attention
   *
-  * COPYRIGHT(c) 2017 STMicroelectronics
+  * <h2><center>&copy; Copyright (c) 2020 STMicroelectronics.
+  * All rights reserved.</center></h2>
   *
-  * Redistribution and use in source and binary forms, with or without modification,
-  * are permitted provided that the following conditions are met:
-  *   1. Redistributions of source code must retain the above copyright notice,
-  *      this list of conditions and the following disclaimer.
-  *   2. Redistributions in binary form must reproduce the above copyright notice,
-  *      this list of conditions and the following disclaimer in the documentation
-  *      and/or other materials provided with the distribution.
-  *   3. Neither the name of STMicroelectronics nor the names of its contributors
-  *      may be used to endorse or promote products derived from this software
-  *      without specific prior written permission.
-  *
-  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-  * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
-  * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
-  * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
-  * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-  * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
-  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+  * This software component is licensed by ST under BSD 3-Clause license,
+  * the "License"; You may not use this file except in compliance with the
+  * License. You may obtain a copy of the License at:
+  *                        opensource.org/licenses/BSD-3-Clause
   *
   ******************************************************************************
   */
+/* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-#include "stm32f4xx_hal.h"
+#include "dma2d.h"
+#include "i2c.h"
 #include "ltdc.h"
+#include "spi.h"
 #include "gpio.h"
 #include "fmc.h"
 
+/* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "stm32f429i_discovery.h"
 #include "stm32f429i_discovery_ts.h"
 #include "stm32f429i_discovery_io.h"
 #include "stm32f429i_discovery_lcd.h"
 
-#include "ts_calibration.h"
-#include "cube.h"
+// opengl.h import must be the first one
+#include "opengl.h"
+
+#include "oglcube.h"
+#include "TouchScreen/ts_calibration.h"
 #include "camera.h"
 #include "framehandler.h"
 #include "depth_sdram.h"
-#include "debug_printf.h"
 #include "linmath_test.h"
 #include "Demo.h"
+#include "Log/lcd_log.h"
 
 /* USER CODE END Includes */
+
+/* Private typedef -----------------------------------------------------------*/
+/* USER CODE BEGIN PTD */
+
+/* USER CODE END PTD */
+
+/* Private define ------------------------------------------------------------*/
+/* USER CODE BEGIN PD */
+/* USER CODE END PD */
+
+/* Private macro -------------------------------------------------------------*/
+/* USER CODE BEGIN PM */
+#define DEPTH_SDRAM_START_ADRRES (LCD_FRAME_BUFFER + 2 * BUFFER_OFFSET)
+
+/* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-
-#define DEPTH_SDRAM_START_ADRRES (LCD_FRAME_BUFFER + 2 * BUFFER_OFFSET)
-
 extern SDRAM_HandleTypeDef hsdram2;
 static __IO uint8_t m_DemoId = 0;
 
@@ -67,122 +72,134 @@ cOpenGL_DemoTypedef cOpenGL_Examples[] = {
 	{CubeRotationAnim_Resume,  CubeRotationAnim_Pause},
 	{CubeTouchMe_Resume,       CubeTouchMe_Pause},
 };
-
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
-void Error_Handler(void);
-
 /* USER CODE BEGIN PFP */
-/* Private function prototypes -----------------------------------------------*/
-void BSP_InitStuff();
+void BSP_InitAll();
+
 /* USER CODE END PFP */
 
+/* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+void BSP_InitAll() {
+   /* Initialize the LCD */
+   BSP_LCD_Init();
+   LCD_LOG_Init();
 
-void BSP_InitStuff() {
-	/* Initialize the LCD */
-	BSP_LCD_Init();
+   /* Initialize the LCD Layers */
+   BSP_LCD_LayerDefaultInit(1, LCD_FRAME_BUFFER);
+   BSP_LCD_LayerDefaultInit(0, LCD_FRAME_BUFFER + BUFFER_OFFSET);
 
-	/* Initialize the LCD Layers */
-	BSP_LCD_LayerDefaultInit(1, LCD_FRAME_BUFFER);
-	BSP_LCD_LayerDefaultInit(0, LCD_FRAME_BUFFER + BUFFER_OFFSET);
+   /* Initialize LEDs */
+   BSP_LED_Init(LED3);
+   BSP_LED_Init(LED4);
 
-	/* Initialize LEDs */
-	BSP_LED_Init(LED3);
-	BSP_LED_Init(LED4);
+   int layer_id;
+   for (layer_id = 0; layer_id < 2; layer_id++) {
+	   BSP_LCD_SelectLayer(layer_id);
+	   BSP_LCD_SetFont(&Font16);
+	   BSP_LCD_SetBackColor(0xFF00FF00);
+	   BSP_LCD_Clear(LCD_COLOR_WHITE);
+   }
 
-	BSP_LCD_SelectLayer(1);
-	BSP_LCD_SetFont(&LCD_DEFAULT_FONT);
-	BSP_LCD_SetBackColor(0xFF00FF00);
-	BSP_LCD_Clear(LCD_COLOR_WHITE);
+   TS_StatusTypeDef ts_ret = BSP_TS_Init(BSP_LCD_GetXSize(), BSP_LCD_GetYSize());
+   assert_param(ts_ret == TS_OK);
 
-	TS_StatusTypeDef ts_ret = BSP_TS_Init(BSP_LCD_GetXSize(), BSP_LCD_GetYSize());
-	assert_expr(ts_ret == TS_OK);
-
-	if (IsCalibrationDone() == 0) {
-		Touchscreen_Calibration();
-	}
+   if (IsCalibrationDone() == 0) {
+	   Touchscreen_Calibration();
+   }
 }
 
 /* USER CODE END 0 */
 
+/**
+  * @brief  The application entry point.
+  * @retval int
+  */
 int main(void)
 {
-
   /* USER CODE BEGIN 1 */
-
-#ifdef DEBUG_CONSOLE
-	initialise_monitor_handles();
-#endif
 
   /* USER CODE END 1 */
 
-  /* MCU Configuration----------------------------------------------------------*/
+  /* MCU Configuration--------------------------------------------------------*/
 
   /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
   HAL_Init();
 
+  /* USER CODE BEGIN Init */
+
+  /* USER CODE END Init */
+
   /* Configure the system clock */
   SystemClock_Config();
 
+  /* USER CODE BEGIN SysInit */
+
+  /* USER CODE END SysInit */
+
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
-  MX_LTDC_Init();
-  MX_FMC_Init();
-
+//  MX_FMC_Init();
+//  MX_LTDC_Init();
+//  MX_DMA2D_Init();
+//  MX_SPI5_Init();
+//  MX_I2C3_Init();
   /* USER CODE BEGIN 2 */
-	BSP_InitStuff();
 
-#ifdef USE_ASSERT_EXPR
-	Linmath_RunTests();
-#endif /* USE_ASSERT_EXPR */
+  // FMC, LTDC, DMA2D, SPI5, and I2C3 will be reinitialized in BSP_LCD_Init()
 
-	Depth_SDRAM_Init(&hsdram2, DEPTH_SDRAM_START_ADRRES, BSP_LCD_GetXSize(),
-			BSP_LCD_GetYSize());
+  BSP_InitAll();
 
-	Camera camera;
-	Camera_Init(&camera);
+#ifdef OPENGL_ASSERT
+  Linmath_RunTests();
+#endif /* OPENGL_ASSERT */
 
-	FrameHandler_Init(BSP_LCD_GetXSize(), BSP_LCD_GetYSize());
+  Depth_SDRAM_Init(&hsdram2, DEPTH_SDRAM_START_ADRRES, BSP_LCD_GetXSize(),
+			 BSP_LCD_GetYSize());
 
-	CubeRotationAnim_Init(&camera);
-	CubeTouchMe_Init(&camera);
+  Camera camera;
+  Camera_Init(&camera);
+
+  FrameHandler_Init(BSP_LCD_GetXSize(), BSP_LCD_GetYSize());
+
+  CubeRotationAnim_Init(&camera);
+  CubeTouchMe_Init(&camera);
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-	while (1) {
-		cOpenGL_Examples[m_DemoId].Resume();
+  while (1)
+  {
+	  cOpenGL_Examples[m_DemoId].Resume();
 
+    /* USER CODE END WHILE */
 
-  /* USER CODE END WHILE */
-
-  /* USER CODE BEGIN 3 */
-
-	}
+    /* USER CODE BEGIN 3 */
+  }
   /* USER CODE END 3 */
-
 }
 
-/** System Clock Configuration
-*/
+/**
+  * @brief System Clock Configuration
+  * @retval None
+  */
 void SystemClock_Config(void)
 {
+  RCC_OscInitTypeDef RCC_OscInitStruct = {0};
+  RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
+  RCC_PeriphCLKInitTypeDef PeriphClkInitStruct = {0};
 
-  RCC_OscInitTypeDef RCC_OscInitStruct;
-  RCC_ClkInitTypeDef RCC_ClkInitStruct;
-  RCC_PeriphCLKInitTypeDef PeriphClkInitStruct;
-
-    /**Configure the main internal regulator output voltage 
-    */
+  /** Configure the main internal regulator output voltage
+  */
   __HAL_RCC_PWR_CLK_ENABLE();
-
   __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE1);
-
-    /**Initializes the CPU, AHB and APB busses clocks 
-    */
+  /** Initializes the RCC Oscillators according to the specified parameters
+  * in the RCC_OscInitTypeDef structure.
+  */
   RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
   RCC_OscInitStruct.HSEState = RCC_HSE_ON;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
@@ -195,16 +212,14 @@ void SystemClock_Config(void)
   {
     Error_Handler();
   }
-
-    /**Activate the Over-Drive mode 
-    */
+  /** Activate the Over-Drive mode
+  */
   if (HAL_PWREx_EnableOverDrive() != HAL_OK)
   {
     Error_Handler();
   }
-
-    /**Initializes the CPU, AHB and APB busses clocks 
-    */
+  /** Initializes the CPU, AHB and APB buses clocks
+  */
   RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
                               |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
   RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
@@ -216,7 +231,6 @@ void SystemClock_Config(void)
   {
     Error_Handler();
   }
-
   PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_LTDC;
   PeriphClkInitStruct.PLLSAI.PLLSAIN = 50;
   PeriphClkInitStruct.PLLSAI.PLLSAIR = 2;
@@ -225,17 +239,6 @@ void SystemClock_Config(void)
   {
     Error_Handler();
   }
-
-    /**Configure the Systick interrupt time 
-    */
-  HAL_SYSTICK_Config(HAL_RCC_GetHCLKFreq()/1000);
-
-    /**Configure the Systick 
-    */
-  HAL_SYSTICK_CLKSourceConfig(SYSTICK_CLKSOURCE_HCLK);
-
-  /* SysTick_IRQn interrupt configuration */
-  HAL_NVIC_SetPriority(SysTick_IRQn, 0, 0);
 }
 
 /* USER CODE BEGIN 4 */
@@ -252,94 +255,57 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
 	}
 }
 
-#ifdef USE_ASSERT_EXPR
+#ifdef OPENGL_ASSERT
+
 /**
-   * @brief Reports from non-HAL namespace
-   * where the assert_param error has occurred.
+   * @brief OpenGL application specific reports,
+   * where the opengl_assert error has occurred.
    * @param file: pointer to the source file name
-   * @param line: assert_param error line source number
+   * @param line: opengl_assert error line source number
    * @retval None
    */
-void assert_expr_failed(const uint8_t* file, uint32_t line)
+void opengl_assert_failed(uint8_t* file, uint32_t line)
 {
-	db_printf("Wrong parameters value: file %s on line %lu\r\n", file, line);
-	char msg[LCD_MAX_CHARS_LINE + 1];
 	BSP_LCD_SetLayerVisible(1, ENABLE);
 	BSP_LCD_SelectLayer(1);
-	BSP_LCD_Clear(LCD_COLOR_WHITE);
-	BSP_LCD_SetBackColor(LCD_COLOR_WHITE);
-	BSP_LCD_SetTextColor(LCD_COLOR_RED);
-	BSP_LCD_SetFont(&Font16);
-	BSP_LCD_DisplayStringAtLine(0, (uint8_t*) "assert failed");
-	sprintf(msg, "on line %lu", line);
-	BSP_LCD_DisplayStringAtLine(1, (uint8_t*) msg);
-	BSP_LCD_SetFont(&Font12);
-
-	uint16_t lineid = 3;
-	int32_t msglen = 0;
-	while (file[msglen] != '\0') {
-		msglen++;
-	}
-	int32_t msg_start = 0, i;
-	while (msglen > msg_start) {
-		int32_t part_size = LINMATH_MIN(LCD_MAX_CHARS_LINE, msglen - msg_start);
-		for (i = 0; i < part_size; ++i) {
-			msg[i] = file[msg_start + i];
-		}
-		msg[part_size] = '\0';
-		BSP_LCD_DisplayStringAtLine(lineid, (uint8_t*) msg);
-		msg_start += part_size;
-		lineid++;
-	}
+	LCD_ErrLog("Assert failed: %s, line %lu\n", file, line);
 	Error_Handler();
 }
-#endif /* USE_ASSERT_EXPR */
+
+#endif /* OPENGL_ASSERT */
 
 /* USER CODE END 4 */
 
 /**
   * @brief  This function is executed in case of error occurrence.
-  * @param  None
   * @retval None
   */
 void Error_Handler(void)
 {
-  /* USER CODE BEGIN Error_Handler */
-	/* User can add his own implementation to report the HAL error return state */
-	while (1) {
-		BSP_LED_Toggle(LED4);
-		HAL_Delay(200);
-	}
-  /* USER CODE END Error_Handler */ 
+  /* USER CODE BEGIN Error_Handler_Debug */
+  /* User can add his own implementation to report the HAL error return state */
+    HAL_GPIO_WritePin(GPIOG, GPIO_PIN_14, GPIO_PIN_SET);
+    while (1);
+
+  /* USER CODE END Error_Handler_Debug */
 }
 
-#ifdef USE_FULL_ASSERT
-
+#ifdef  USE_FULL_ASSERT
 /**
-   * @brief Reports the name of the source file and the source line number
-   * where the assert_param error has occurred.
-   * @param file: pointer to the source file name
-   * @param line: assert_param error line source number
-   * @retval None
-   */
-void assert_failed(uint8_t* file, uint32_t line)
+  * @brief  Reports the name of the source file and the source line number
+  *         where the assert_param error has occurred.
+  * @param  file: pointer to the source file name
+  * @param  line: assert_param error line source number
+  * @retval None
+  */
+void assert_failed(uint8_t *file, uint32_t line)
 {
   /* USER CODE BEGIN 6 */
-	/* User can add his own implementation to report the file name and line number,
-	 ex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
-	assert_expr_failed(file, line);
+  /* User can add his own implementation to report the file name and line number,
+     tex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
+    opengl_assert_failed(file, line);
   /* USER CODE END 6 */
-
 }
-
-#endif
-
-/**
-  * @}
-  */ 
-
-/**
-  * @}
-*/ 
+#endif /* USE_FULL_ASSERT */
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
