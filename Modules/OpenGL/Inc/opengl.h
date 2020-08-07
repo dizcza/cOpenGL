@@ -8,7 +8,11 @@
 #ifndef OPENGL_INC_OPENGL_H_
 #define OPENGL_INC_OPENGL_H_
 
+#include <stdint.h>
 #include "stm32f4xx_hal.h"
+
+#include "linmath.h"
+#include "linmath_additional.h"
 
 
 #define OPENGL_ASSERT

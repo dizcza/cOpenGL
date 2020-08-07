@@ -17,6 +17,8 @@
 #define TOUCH_FULL_ROTATION_PX   300
 #define CONFIDENCE_SENSOR_PARAM  0.8f
 
+#define ON_TOUCH_MOVE            0.001f
+
 typedef enum {
 	TS_NONE,
 	TS_MOVE
@@ -49,8 +51,8 @@ static TS_ActionTypeDef onTouchMove(vec2 curr, vec2 prev) {
 	} else {
 		TS_Calibrate(curr, prev);
 		vec3 vMove = {curr[1] - prev[1], curr[0] - prev[0], 0.f};
-		vMove[0] += LINMATH_EPS;
-		vMove[1] += LINMATH_EPS;
+		vMove[0] += ON_TOUCH_MOVE;
+		vMove[1] += ON_TOUCH_MOVE;
 		float vMovePx = vec3_len(vMove);
 //		LCD_Printf("%.1f, %.1f, %.1f", vMove[0], vMove[1], vMove[2]);
 		quat q;

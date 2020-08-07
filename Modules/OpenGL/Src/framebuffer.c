@@ -74,10 +74,10 @@ void FrameBuffer_FillTrian(FrameBuffer* frame, trian3 const trian_xyz, vec3uint3
 void FrameBuffer_ProjectTrian4(FrameBuffer* frame, trian4 const trian, vec3uint32 const vcolors, mat4x4 const mvp) {
 	uint8_t i;
 	trian3 trian_xyz;
+	vec4 ndc_point;
 	for (i = 0; i < 3; ++i) {
-		vec4 ndc_point;
 		mat4x4_mul_vec4(ndc_point, mvp, trian[i]);
-		vec4_scale_self(ndc_point, 1.0 / ndc_point[3]);
+		vec4_scale(ndc_point, ndc_point, 1.0f / ndc_point[3]);
 		FrameBuffer_ProjectNdcPointToScreen(frame, trian_xyz[i], ndc_point);
 	}
 	FrameBuffer_FillTrian(frame, trian_xyz, vcolors);

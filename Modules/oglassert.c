@@ -18,7 +18,7 @@ void OpenGL_AssertTrian454590(trian4 const trian) {
 	vec3_sub(mv[1], trian[2], trian[1]);
 	vec3_sub(mv[2], trian[0], trian[2]);
 	for (i = 0; i < 3; ++i) {
-		vec3_norm_self(mv[i]);
+        vec3_norm(mv[i], mv[i]);
 	}
 	float products[3];
 	for (i = 0; i < 3; ++i) {
