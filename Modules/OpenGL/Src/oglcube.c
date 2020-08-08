@@ -40,7 +40,7 @@ static const uint32_t m_colors[CUBE_VERTEX_COUNT] = {
 };
 
 static void Cube_InitIndices(Cube* cube) {
-	uint8_t i;
+	int i;
 	for (i = 0; i < CUBE_INDEX_COUNT; ++i) {
 		cube->indices[i] = m_indices[i];
 	}
@@ -48,19 +48,19 @@ static void Cube_InitIndices(Cube* cube) {
 
 static void Cube_InitVertices(Cube* cube) {
 	const float half_sz = 0.5;
-	vec4_set(cube->vertices[0],  - half_sz,  - half_sz,  + half_sz, 1.0);
-	vec4_set(cube->vertices[1],  + half_sz,  - half_sz,  + half_sz, 1.0);
-	vec4_set(cube->vertices[2],  + half_sz,  + half_sz,  + half_sz, 1.0);
-	vec4_set(cube->vertices[3],  - half_sz,  + half_sz,  + half_sz, 1.0);
+	vec4_init(cube->vertices[0],  - half_sz,  - half_sz,  + half_sz, 1.0);
+	vec4_init(cube->vertices[1],  + half_sz,  - half_sz,  + half_sz, 1.0);
+	vec4_init(cube->vertices[2],  + half_sz,  + half_sz,  + half_sz, 1.0);
+	vec4_init(cube->vertices[3],  - half_sz,  + half_sz,  + half_sz, 1.0);
 
-	vec4_set(cube->vertices[4],  - half_sz,  - half_sz,  - half_sz, 1.0);
-	vec4_set(cube->vertices[5],  + half_sz,  - half_sz,  - half_sz, 1.0);
-	vec4_set(cube->vertices[6],  + half_sz,  + half_sz,  - half_sz, 1.0);
-	vec4_set(cube->vertices[7],  - half_sz,  + half_sz,  - half_sz, 1.0);
+	vec4_init(cube->vertices[4],  - half_sz,  - half_sz,  - half_sz, 1.0);
+	vec4_init(cube->vertices[5],  + half_sz,  - half_sz,  - half_sz, 1.0);
+	vec4_init(cube->vertices[6],  + half_sz,  + half_sz,  - half_sz, 1.0);
+	vec4_init(cube->vertices[7],  - half_sz,  + half_sz,  - half_sz, 1.0);
 }
 
 static void Cube_InitColors(Cube* cube) {
-	uint8_t i;
+	int i;
 	for (i = 0; i < CUBE_VERTEX_COUNT; ++i) {
 		cube->colors[i] = m_colors[i];
 	}
@@ -75,7 +75,7 @@ void OpenGL_Cube_Init(Cube* cube, float size) {
 }
 
 void OpenGL_Cube_RotateLocal(Cube* cube, quat const q) {
-	uint8_t i;
+	int i;
 	for (i = 0; i < CUBE_VERTEX_COUNT; ++i) {
 		quat_mul_vec3(cube->vertices[i], q, cube->vertices[i]);
 	}
@@ -86,22 +86,17 @@ void OpenGL_Cube_Scale(Cube* cube, float scale) {
 }
 
 
-void OpenGL_Cube_Translate(Cube* cube, float x, float y, float z) {
-	mat4x4_translate_gl(cube->model, x, y, z);
-}
-
 void OpenGL_Cube_TranslateVec3(Cube* cube, vec3 const v) {
-	OpenGL_Cube_Translate(cube, v[0], v[1], v[2]);
+	mat4x4_translate_gl(cube->model, v);
 }
 
 // in 3D space
-void OpenGL_Cube_GetTriangle(const Cube* cube, trian4 trian, vec3uint32 colors, uint8_t tr_id) {
-	uint8_t index;
+void OpenGL_Cube_GetTriangle(const Cube* cube, trian4 trian, vec3uint32 colors, int tr_id) {
+	int index;
 	for (index = 3 * tr_id; index < 3 * (tr_id + 1); ++index) {
 		const uint8_t local_pid = index % 3;
 		uint8_t vid = cube->indices[index];
 		colors[local_pid] = cube->colors[vid];
 		vec4_dup(trian[local_pid], cube->vertices[vid]);
-		//db_printf("tr %d, vid %d, local_pid %d, color 0x%08x\n", tr_id, vid, local_pid, colors[local_pid]);
 	}
 }

@@ -54,9 +54,8 @@ static TS_ActionTypeDef onTouchMove(vec2 curr, vec2 prev) {
 		vMove[0] += ON_TOUCH_MOVE;
 		vMove[1] += ON_TOUCH_MOVE;
 		float vMovePx = vec3_len(vMove);
-//		LCD_Printf("%.1f, %.1f, %.1f", vMove[0], vMove[1], vMove[2]);
 		quat q;
-		float rads = LINMATH_DEGREES_TO_RADS(360.f * vMovePx / TOUCH_FULL_ROTATION_PX);
+		float rads = M_PI * vMovePx / TOUCH_FULL_ROTATION_PX;
 		quat_rotate(q, rads, vMove);
 		OpenGL_Cube_RotateLocal(&m_Cube, q);
 		action = TS_MOVE;

@@ -154,7 +154,7 @@ int main(void)
   BSP_InitAll();
 
 #ifdef OPENGL_ASSERT
-  Linmath_RunTests();
+  linmath_test_run_all();
 #endif /* OPENGL_ASSERT */
 
   Depth_SDRAM_Init(&hsdram2, DEPTH_SDRAM_START_ADRRES, BSP_LCD_GetXSize(),

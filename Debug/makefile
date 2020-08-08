@@ -10,7 +10,6 @@ RM := rm -rf
 -include sources.mk
 -include Startup/subdir.mk
 -include Src/subdir.mk
--include Modules/linmath.h/subdir.mk
 -include Modules/OpenGL/Src/subdir.mk
 -include Modules/LCD/TouchScreen/subdir.mk
 -include Modules/LCD/Log/subdir.mk

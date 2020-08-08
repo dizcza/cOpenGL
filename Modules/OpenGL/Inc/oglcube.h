@@ -32,6 +32,6 @@ void OpenGL_Cube_TranslateVec3(Cube* cube, vec3 const v);
 void OpenGL_Cube_RotateWorld(Cube* cube, quat const q);
 void OpenGL_Cube_RotateLocal(Cube* cube, quat const q);
 
-void OpenGL_Cube_GetTriangle(const Cube* cube, trian4 trian, vec3uint32 colors, uint8_t tr_id);
+void OpenGL_Cube_GetTriangle(const Cube* cube, trian4 trian, vec3uint32 colors, int tr_id);
 
 #endif /* OPENGL_CUBE_H_ */

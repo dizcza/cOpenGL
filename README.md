@@ -28,13 +28,13 @@ git clone https://github.com/dizcza/cOpenGL.git --recursive
 * Antialiasing.
 
 
-The main function is
+The basis function is
 
 ```c
 void FrameBuffer_ProjectTrian4(FrameBuffer* frame, trian4 trian, vec3uint32 vcolors, mat4x4 mvp);
 ```
 
-that projects a 3D triangle onto the screen.
+that projects an arbitrary 3D triangle onto the screen.
 
 
 **Note**. This project is educational: the aim is to show how to implement OpenGL basics from scratch. Be aware of the performance issues (see benchamrk below) before using the library.
@@ -63,8 +63,8 @@ Benhmark is measured by FPS (frames per second) on the scene with 3 cubes for di
 # Similar projects
 
 * [ST7735](https://github.com/cbm80amiga/ST7735_3d_filled_vector) is another port of OpenGL on STM32, using Q1.15 fixed precision float format.
-* [arduinogl](https://github.com/fabio914/arduinogl) OpenGL port on Arduino that neglects depth and can draw lines only.
 * [FGL](https://bitbucket.org/acassis/apps_fgl) port on STM32 Discovery board ([video](https://www.youtube.com/watch?v=XOdfvi7cgLc)).
+* [arduinogl](https://github.com/fabio914/arduinogl) OpenGL port on Arduino that neglects depth and can draw lines only.
 * Doom ports:
   - [stm32doom](https://github.com/floppes/stm32doom): not OpenGL, and not even 3D (it's 2.5D), but highly optimized;
   - [esp32-doom](https://github.com/app-z/esp32-doom) and [video](https://www.youtube.com/watch?v=TFE2ri2Zgu4) (don't know the details).

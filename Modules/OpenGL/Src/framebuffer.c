@@ -58,7 +58,7 @@ void FrameBuffer_FillTrian(FrameBuffer* frame, trian3 const trian_xyz, vec3uint3
 		for (x = LINMATH_MAX(bmin[0], 0); x < LINMATH_MIN(bmax[0], frame->width); ++x) {
 			vec2 p = {x, y};
 			trian2_barycentric(baryc, trian_xy, p);
-			if (vec3_all_pos(baryc)) {
+			if (vec3_is_nonnegative(baryc)) {
 				float p_depth = vec3_mul_inner(baryc, vdepths);
 				if (p_depth >= -1.0f && p_depth < frame->ReadDepth(x, y)) {
 					frame->WriteDepth(x, y, p_depth);

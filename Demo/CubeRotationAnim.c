@@ -41,11 +41,13 @@ static void GetRandomRotation(quat rot) {
 	axis[0] = GetRandomFloatRange(-1, 1);
 	axis[1] = GetRandomFloatRange(-1, 1);
 	axis[2] = GetRandomFloatRange(-1, 1);
-	float degrees = GetRandomFloat() * 360;
-	quat_rotate(rot, LINMATH_DEGREES_TO_RADS(degrees), axis);
+	float angle_rads = GetRandomFloat() * M_PI;
+	quat_rotate(rot, angle_rads, axis);
 }
 
 void CubeRotationAnim_Init(const Camera* camera) {
+	srand(1U);
+
 	m_Camera = camera;
 	m_isActive = 0;
 
@@ -80,8 +82,8 @@ void CubeRotationAnim_Resume() {
 	uint32_t curr = HAL_GetTick();
 	uint32_t ms_passed = (curr - m_lastTick) % ROTANIM_DURATION_MS;
 	float time_local = ((float)ms_passed) / ROTANIM_DURATION_MS;
-	float degrees = time_local * 180.f;
-	quat_rotate(q, LINMATH_DEGREES_TO_RADS(degrees), m_axis);
+	float angle_rads = time_local * M_PI;
+	quat_rotate(q, angle_rads, m_axis);
 	for (i = 0; i < ROTANIM_CUBE_CNT; ++i) {
 		OpenGL_Cube_RotateLocal(&m_Cubes[i], q);
 		FrameHandler_DrawCube(m_Camera, &m_Cubes[i]);
