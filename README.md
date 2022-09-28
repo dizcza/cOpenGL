@@ -9,7 +9,7 @@ git clone https://github.com/dizcza/cOpenGL.git --recursive
 ```
 
 
-[Latest binary](https://drive.google.com/drive/folders/0B5LYlYDnS3oHMWpkVGVkTzVuZUU?usp=sharing)
+cOpenGL bin and elf binary files are shared on Google Drive with this [link](https://drive.google.com/drive/folders/0B5LYlYDnS3oHMWpkVGVkTzVuZUU?resourcekey=0-wuHBtv6pyzeQvAtLxgnNeg&usp=sharing).
 
 ## Features
 
