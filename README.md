@@ -8,8 +8,11 @@ The library relies on [linmath.h](https://github.com/dizcza/linmath.h) that prov
 git clone https://github.com/dizcza/cOpenGL.git --recursive
 ```
 
+## Binaries
 
-cOpenGL bin and elf binary files are shared on Google Drive with this [link](https://drive.google.com/drive/folders/0B5LYlYDnS3oHMWpkVGVkTzVuZUU?resourcekey=0-wuHBtv6pyzeQvAtLxgnNeg&usp=sharing).
+See [Releases](https://github.com/dizcza/cOpenGL/releases).
+
+Also uploaded on [Google Drive](https://drive.google.com/drive/folders/0B5LYlYDnS3oHMWpkVGVkTzVuZUU?resourcekey=0-wuHBtv6pyzeQvAtLxgnNeg&usp=sharing).
 
 ## Features
 
